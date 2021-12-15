@@ -2,7 +2,7 @@
 The OpenChessBoard is an open-source smart chess board to play online chess on a physical chess board. Currently the board is linked to your account on Lichess.org and directly connects to any ongoing game. You can use the Lichess browser application or your smartphone app to start a game from your account. When the board finds a new ongoing game, the board serves as input device and directly sends the move inputs to the Lichess server over a secure WiFi connection (SSL).
 
 # Requirements
-This project runs on Arduino Nano 33 IoT with the OpenChessBoard hardware. You can order the PCBA (inlcuding Arduino Nano 33 IoT) from [OpenChessBoard.com]   (https://openchessboard.com/).
+This project runs on Arduino Nano 33 IoT with the OpenChessBoard hardware. You can order the PCBA (inlcuding Arduino Nano 33 IoT) from [OpenChessBoard](http://openchessboard.com/).
 
 ## Setup
 ### 1. Download the Arduino IDE
