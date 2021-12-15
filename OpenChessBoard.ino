@@ -29,11 +29,9 @@ WiFiSSLClient client2; // WIFISSLClient for post moves, always connects via SSL 
 
 
 //Secret data
-//char ssid[] = "Oioioi2.4";     // your network SSID (name)
-//char pass[] = "1208salat!";    // your network password (use for WPA, or use as key for WEP)
-char ssid[] = "Board";     // your network SSID (name)
-char pass[] = "board123";    // your network password (use for WPA, or use as key for WEP)
-char token[] = "wF6HUwZfyJgbvPqF"; // your lichess API token : Arduino_Lichess, botmokko2
+char ssid[] = "my_network_name";      // your network SSID (name)
+char pass[] = "my_password";          // your network password (use for WPA, or use as key for WEP)
+char token[] = "my_lichess_token";    // your lichess API token 
 
 
 //lichess variables
