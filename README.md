@@ -10,7 +10,7 @@ Get the latest version [here](https://www.arduino.cc/en/software).
 ### 2. Import .ino files from this repository
 Download this project and import files with the Arduino IDE.
 ### 3. Update certificate for SSL connection of the WiFi module
-Update the WiFi module to the latest WiFi firmware and add the lichess.org:443 (instead of google.com:443) root certificate as shown in this [example].(https://support.arduino.cc/hc/en-us/articles/360016119219-How-to-add-certificates-to-Wifi-Nina-Wifi-101-Modules-)
+Update the WiFi module to the latest WiFi firmware and add the lichess.org:443 (instead of google.com:443) root certificate as shown in this [example](https://support.arduino.cc/hc/en-us/articles/360016119219-How-to-add-certificates-to-Wifi-Nina-Wifi-101-Modules-).
 ### 4. Link the OpenChessBoard to your Lichess account.
 Generate an API token (here)(https://lichess.org/account/oauth/token).
 ### 5. Change your login data in OpenChessBoard.ino
