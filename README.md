@@ -4,10 +4,10 @@ This project runs on Arduino Nano 33 IoT
 
 
 ## Setup
-Get the Arduino IDE.
-Download all files and import to Arduino IDE.
+### [Get the Arduino IDE]
+### [Download all files and import to Arduino IDE]
 ### [Certificate for SSL connection]
-Add the lichess.org:443 (instead of google.com:443) root certificate as shown in this [example](https://support.arduino.cc/hc/en-us/articles/360016119219-How-to-add-certificates-to-Wifi-Nina-Wifi-101-Modules-)
+Update to the latest WiFi firmware and add the lichess.org:443 (instead of google.com:443) root certificate as shown in this [example](https://support.arduino.cc/hc/en-us/articles/360016119219-How-to-add-certificates-to-Wifi-Nina-Wifi-101-Modules-)
 
 
 ## Testing
