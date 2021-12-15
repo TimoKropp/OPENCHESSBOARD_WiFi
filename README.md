@@ -1,7 +1,7 @@
 # What is the OpenChessBoard?
 The OpenChessBoard is an open-source smart chess board to play online chess on a physical chess board. 
 Check out how it works in this video.
-![](https://www.youtube.com/watch?v=PFouUxKJOSc)
+<iframe width="560" height="315" src="https://www.youtube.com/embed/PFouUxKJOSc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 This repository is the starting point to develop your own smart chess board or start playing directly with the existing version by following the setup procedure.
 
 # OpenChessBoard v1.0.0
