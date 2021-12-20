@@ -1,4 +1,11 @@
-void wifi_setup(){
+/* ---------------------------------------
+ *  setup function for wifi module. 
+ *  Checks for wifi firmware  update 
+ *  and connects wifi module to network.
+ *  @params[in] void
+ *  @return void
+*/
+void wifi_setup(void){
   
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
@@ -30,8 +37,13 @@ void wifi_setup(){
   printWiFiStatus();
   }
 
-
-void printWiFiStatus() {
+/* ---------------------------------------
+ *  function to print wifi status.
+ *  @params[in] void
+ *  @return void
+ *  
+*/
+void printWiFiStatus(void) {
   // print the SSID of the network you're attached to:
   DEBUG_SERIAL.print("SSID: ");
   DEBUG_SERIAL.println(WiFi.SSID());

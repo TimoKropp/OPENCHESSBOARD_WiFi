@@ -1,4 +1,11 @@
-void TC4_Handler()
+/* ---------------------------------------
+ *  interupt handler function. Changes LED states for booting and connection sequence.
+ *  When game is running, this function periodically checks for the game status from 
+ *  the stream of the StreamClient.
+ *  @params[in] void
+ *  @return void
+*/
+void TC4_Handler(void)
 {
   if (is_booting)
   {
@@ -17,9 +24,9 @@ void TC4_Handler()
     DEBUG_SERIAL.println("game is running");
     
      char char_response[800] = {0};
-     while(client.available()) {
+     while(StreamClient.available()) {
       char_response[800] = {0};
-      client.readBytesUntil('\n', char_response, sizeof(char_response));
+      StreamClient.readBytesUntil('\n', char_response, sizeof(char_response));
      }
      String game_status_str  = GetStringBetweenStrings((String)char_response, "status", "winner");
      String game_status = game_status_str.substring(3, 10);
@@ -40,6 +47,13 @@ void TC4_Handler()
 
 }
 
+
+/* ---------------------------------------
+ *  Function to set up interupt service routine. 
+ *  Sets blinking frequency by isr interval.
+ *  @params[in] void
+ *  @return void
+*/
 void isr_retup(void) {
 
   GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN |                 // Enable GCLK0 for TC4 and TC5

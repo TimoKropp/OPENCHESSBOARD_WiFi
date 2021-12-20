@@ -1,4 +1,10 @@
-void postMove() {
+/* ---------------------------------------
+ *  Function to send post move request to Lichess API.
+ *  Restarts client and stops client after request 
+ *  @params[in] WiFiSSLClient
+ *  @return void
+*/
+void postMove(WiFiSSLClient &client) {
           while (myturn && is_game_running)
           {
             clearDisplay();
@@ -8,26 +14,29 @@ void postMove() {
             DEBUG_SERIAL.println(move_input);
           
             myMove = move_input;
-            client2.connect(server, 443);
+            client.connect(server, 443);
   
-            client2.print("POST /api/board/game/");
-            client2.print((String)currentGameID);
-            client2.print("/move/");
-            client2.print(move_input);
-            client2.println(" HTTP/1.0");
-            client2.println("Host: lichess.org");
-            client2.print("Authorization: Bearer ");
-            client2.println(token);
-            client2.println("Connection: keep-alive");
-            client2.println();
+            client.print("POST /api/board/game/");
+            client.print((String)currentGameID);
+            client.print("/move/");
+            client.print(move_input);
+            client.println(" HTTP/1.0");
+            client.println("Host: lichess.org");
+            client.print("Authorization: Bearer ");
+            client.println(token);
+            client.println("Connection: keep-alive");
+            client.println();
             delay(300);
-            boolean moveSuccess = false;
-            processHTTP2(); // if the move is invalid it will get picked up in this function as a 400 Bad request
+            
+            processHTTP(client); 
+            
             StaticJsonDocument<48> doc;
-            DeserializationError error = deserializeJson(doc, client2);
+            DeserializationError error = deserializeJson(doc, client);
   
-            client2.stop();
-            //determine whether the move was successful
+            client.stop();
+            
+            //check for sucessful move
+            boolean moveSuccess = false;
             moveSuccess = doc["ok"];
             if (moveSuccess == true) {
               DEBUG_SERIAL.println("move success!");
@@ -52,7 +61,13 @@ void postMove() {
           }
 }
 
-void getUsername(){
+/* ---------------------------------------
+ *  Function to send get username move request to Lichess API.
+ *  Sets requested username to global variable username.
+ *  @params[in] WiFiSSLClient
+ *  @return void
+*/
+void getUsername(WiFiSSLClient &client){
      DEBUG_SERIAL.println("connected to server in setup");
     // SETUP API: MAKE A REQUEST TO DOWNLOAD THE CURRENT USER'S LICHESS USERNAME
     client.println("GET /api/account HTTP/1.1");
@@ -61,67 +76,62 @@ void getUsername(){
     client.print("Authorization: Bearer ");
     client.println(token);
     delay(100); 
-    //process the request and parse the header
-    processHTTP();
-    // Allocate the JSON document
-    // Use arduinojson.org/v6/assistant to compute the capacity.
+
+    processHTTP(client);
+
     DynamicJsonDocument doc(2048);
-    // Parse JSON object
     DeserializationError error = deserializeJson(doc, client);
     if (error)
     {
-      // this is due to an error in the HTTP request
       DEBUG_SERIAL.print(F("deserializeJson() failed: "));
       DEBUG_SERIAL.println(error.f_str());
       return;
     }
-    // Extract values
     DEBUG_SERIAL.println(F("Connected to User:"));
-    // lichess username
+
     username = doc["username"];
     DEBUG_SERIAL.println(username);
+    
     //close request
     client.println("Connection: close");
     client.println();
     if (username != NULL) {
-      delay(100);
+      delay(100); // slow down to not spam requests
     }
   }
-  
-void getTurn(){
 
-    client.println("GET /api/account/playing HTTP/1.1");
+/* ---------------------------------------
+ *  Function to send get stream request to Lichess API.
+ *  Starts the move stream on client.
+ *  @params[in] WiFiSSLClient
+ *  @return void
+*/  
+void getStream(WiFiSSLClient &client){
+    client.print("GET /api/board/game/stream/");
+    client.print((String)currentGameID);
+    client.println(" HTTP/1.1");
     client.println("Host: lichess.org");
     client.print("Authorization: Bearer ");
     client.println(token);
-    delay(100);  
-    processHTTP();
-
-    DynamicJsonDocument doc(2048);
-    DeserializationError error = deserializeJson(doc, client);
-    
-    if (error)
-    {
-      DEBUG_SERIAL.print(F("deserializeJson() failed: "));
-      DEBUG_SERIAL.println(error.f_str());
-    }
-
-    // Extract Game ID
-    JsonObject nowPlaying_0 = doc["nowPlaying"][0];
-    myturn = nowPlaying_0["isMyTurn"];
+    client.println("Connection: close");
+    client.println();  
   } 
-   
-void getGameID(){
-  
-    DEBUG_SERIAL.println("Find ongoing game");
 
-    //keep the request so lichess knows you are there
+
+/* ---------------------------------------
+ *  Function to send get gameID request to Lichess API.
+ *  If game is found, global variable currentGameID is set  and sets turn global variable myturn
+ *  @params[in] WiFiSSLClient
+ *  @return void
+*/       
+void getGameID(WiFiSSLClient &client){
     client.println("GET /api/account/playing HTTP/1.1");
     client.println("Host: lichess.org");
     client.print("Authorization: Bearer ");
     client.println(token);
-    delay(100); //delay to allow a response
-    processHTTP();
+    delay(100); 
+    
+    processHTTP(client);
 
     DynamicJsonDocument doc(2048);
     DeserializationError error = deserializeJson(doc, client);
@@ -132,7 +142,6 @@ void getGameID(){
       return;
     }
 
-    // Extract Game ID
     JsonObject nowPlaying_0 = doc["nowPlaying"][0];
     JsonObject nowPlaying_0_opponent = nowPlaying_0["opponent"];
     currentGameID = nowPlaying_0["gameId"];
@@ -140,14 +149,19 @@ void getGameID(){
 
     DEBUG_SERIAL.println(currentGameID);
 }
-  
-void processHTTP() {
 
-  // this function processes http data before it is read by arduino json
+
+/* ---------------------------------------
+ *  Function to evaluate http requests on wifi client.
+ *  Generic function that checks for http status and skips headers
+ *  @params[in] WiFiSSLClient
+ *  @return void
+*/   
+void processHTTP(WiFiSSLClient client) {
   if (client.println() == 0) {
     return;
   }
-  // Check HTTP status
+
   char status[64] = {0};
   client.readBytesUntil('\r', status, sizeof(status));
 
@@ -165,37 +179,6 @@ void processHTTP() {
   // Skip HTTP headers
   char endOfHeaders[] = "\r\n\r\n";
   if (!client.find(endOfHeaders)) {
-    //DEBUG_SERIAL.println(F("Invalid response"));
-    return;
-  }
-}
-
-void processHTTP2() {
-
-  // this function processes http data before it is read by arduino json
-  if (client2.println() == 0) {
-    //DEBUG_SERIAL.println(F("Failed to send request"));
-    return;
-  }
-  // Check HTTP status
-  char status[64] = {0};
-  client2.readBytesUntil('\r', status, sizeof(status));
-
-
-  // It should be "HTTP/1.0 200 OK"
-  if (strcmp(status + 9, "200 OK") != 0) {
-    //DEBUG_SERIAL.print(F("Unexpected response: "));
-    //DEBUG_SERIAL.println(status);
-    if (strcmp(status + 9, "400 Bad Request") == 0) {
-      //delay(2000);
-    }
-    else {
-      return;
-    }
-  }
-  // Skip HTTP headers
-  char endOfHeaders[] = "\r\n\r\n";
-  if (!client2.find(endOfHeaders)) {
     //DEBUG_SERIAL.println(F("Invalid response"));
     return;
   }
