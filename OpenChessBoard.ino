@@ -77,9 +77,7 @@ void loop() {
     {
       is_game_running = true;
       is_connecting = false;
-      
-      //TC4->COUNT16.CTRLA.bit.ENABLE = 0; // disable interupt to stop connection blink animation
-      
+        
       DEBUG_SERIAL.println("Start stream and wait for next move");
       getStream(StreamClient);
       DEBUG_SERIAL.println("wait for incoming moves");
