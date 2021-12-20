@@ -10,17 +10,10 @@ WiFiSSLClient StreamClient; // WIFISSLClient for move stream, always connects vi
 WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via SSL (port 443 for https)
 
 
-<<<<<<< HEAD
 //Secret data, change to your credentials!
 char ssid[] = "my_network_name";     
 char pass[] = "my_network_password";  
 char token[] = "my_lichess_api_token"; 
-=======
-//Secret data
-char ssid[] = "my_network_name";      // your network SSID (name)
-char pass[] = "my_password";          // your network password (use for WPA, or use as key for WEP)
-char token[] = "my_lichess_token";    // your lichess API token 
->>>>>>> 16156850d385bcfc234f7cff9dc2b11a0e7d142b
 
 
 //lichess variables
@@ -30,6 +23,7 @@ bool myturn = true;
 String lastMove;
 String myMove;
 
+
 // LED and state variables
 bool boot_flipstate = true;
 bool is_booting = true;
@@ -37,13 +31,9 @@ bool connect_flipstate = false;
 bool is_connecting = false;
 bool is_game_running = false;
 
-<<<<<<< HEAD
-// Debug settings
-#define DEBUG true  //set to true for debug output, false for no debug output
-=======
+
 // Debug Settings
 #define DEBUG false  //set to true for debug output, false for no debug output
->>>>>>> 16156850d385bcfc234f7cff9dc2b11a0e7d142b
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 void setup() {
