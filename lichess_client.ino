@@ -14,6 +14,9 @@ void postMove(WiFiSSLClient &client) {
             DEBUG_SERIAL.println(move_input);
           
             myMove = move_input;
+            
+            TC4->COUNT16.CTRLA.bit.ENABLE = 0;
+            
             client.connect(server, 443);
   
             client.print("POST /api/board/game/");
@@ -34,6 +37,7 @@ void postMove(WiFiSSLClient &client) {
             DeserializationError error = deserializeJson(doc, client);
   
             client.stop();
+            TC4->COUNT16.CTRLA.bit.ENABLE = 1;
             
             //check for sucessful move
             boolean moveSuccess = false;
@@ -43,7 +47,7 @@ void postMove(WiFiSSLClient &client) {
               myturn = false;
             }
             else
-            {
+            {                
                 DEBUG_SERIAL.println("wrong move!");       
                 displayMove(myMove);
                 String reverse_move =  (String)myMove.charAt(2) 
@@ -59,6 +63,7 @@ void postMove(WiFiSSLClient &client) {
                 }
             }
           }
+
 }
 
 /* ---------------------------------------
@@ -114,7 +119,8 @@ void getStream(WiFiSSLClient &client){
     client.print("Authorization: Bearer ");
     client.println(token);
     client.println("Connection: close");
-    client.println();  
+    client.println();
+    delay(1000);  
   } 
 
 
@@ -146,7 +152,7 @@ void getGameID(WiFiSSLClient &client){
     JsonObject nowPlaying_0_opponent = nowPlaying_0["opponent"];
     currentGameID = nowPlaying_0["gameId"];
     myturn = nowPlaying_0["isMyTurn"];
-
+    
     DEBUG_SERIAL.println(currentGameID);
 }
 

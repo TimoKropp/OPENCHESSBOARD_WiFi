@@ -207,7 +207,7 @@ void readHall(byte read_hall_array[]) {
 String getMoveInput(void) {
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
   String move_input;
-
+ 
   byte piece_pos_array[8];
   byte cur_hall_array1[8];
   byte cur_hall_array2[8];
@@ -283,8 +283,9 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 0);
   delay(300);
-
+  
   return move_input;
+  
 }
 
 

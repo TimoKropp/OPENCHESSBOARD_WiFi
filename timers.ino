@@ -1,9 +1,9 @@
 /* ---------------------------------------
- *  interupt handler function. Changes LED states for booting and connection sequence.
- *  When game is running, this function periodically checks for the game status from 
- *  the stream of the StreamClient.
- *  @params[in] void
- *  @return void
+    interupt handler function. Changes LED states for booting and connection sequence.
+    When game is running, this function periodically checks for the game status from
+    the stream of the StreamClient.
+    @params[in] void
+    @return void
 */
 void TC4_Handler(void)
 {
@@ -12,35 +12,59 @@ void TC4_Handler(void)
     displayBootWait();
     boot_flipstate = !boot_flipstate;
   }
-  
+
   if (is_connecting)
   {
     displayConnectWait();
     connect_flipstate = !connect_flipstate;
   }
-  
-  if (is_game_running)
+
+  if (is_game_running && !is_booting && !is_connecting)
   {
-    DEBUG_SERIAL.println("game is running");
-    
-     char char_response[800] = {0};
-     while(StreamClient.available()) {
+
+    char char_response[800] = {0};
+   
+    while (StreamClient.available()) {
       char_response[800] = {0};
       StreamClient.readBytesUntil('\n', char_response, sizeof(char_response));
-     }
-     String game_status_str  = GetStringBetweenStrings((String)char_response, "status", "winner");
-     String game_status = game_status_str.substring(3, 10);
-     
-     DEBUG_SERIAL.println(game_status);
-     
-     if (game_status != "started" && game_status_str != NULL)
-     {
-        DEBUG_SERIAL.println(game_status);
-        is_game_running = false;
-        is_connecting  = true;
-     }
+    }
 
+    String game_status_str  = GetStringBetweenStrings((String)char_response, "status", "winner");
+    String moves  = GetStringBetweenStrings((String)char_response, "moves", "wtime");
 
+    String game_status = game_status_str.substring(3, 10);
+
+    if (game_status != "started" && game_status_str != NULL)
+    {
+      DEBUG_SERIAL.print("Game Status: ");
+      DEBUG_SERIAL.println(game_status);
+      is_game_running = false;
+      is_connecting  = true;
+      lastMove = "xx";
+      myMove = "ff";
+      currentGameID = NULL;
+      myturn = true;
+      isr_first_run = false;
+    }
+    
+    if (moves.length() > 3)
+    {
+      DEBUG_SERIAL.print("move received: ");
+      int startstr = moves.length() - 7;
+      int endstr =  moves.length() - 3;
+      lastMove = moves.substring(startstr, endstr);
+      DEBUG_SERIAL.println(lastMove);
+    }
+    if (lastMove != myMove)
+    {
+      myturn = true;
+      DEBUG_SERIAL.println("my turn!");
+    }
+    else{
+      DEBUG_SERIAL.println("received move was played by me! (API response)");
+    }
+    
+    isr_first_run = true; // make sure isr is run once before finishing the main loop  
   }
   
   TC4->COUNT16.INTFLAG.reg = TC_INTFLAG_OVF;             // Clear the OVF interrupt flag
@@ -49,10 +73,10 @@ void TC4_Handler(void)
 
 
 /* ---------------------------------------
- *  Function to set up interupt service routine. 
- *  Sets blinking frequency by isr interval.
- *  @params[in] void
- *  @return void
+    Function to set up interupt service routine.
+    Sets blinking frequency by isr interval.
+    @params[in] void
+    @return void
 */
 void isr_retup(void) {
 
