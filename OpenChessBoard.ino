@@ -15,9 +15,9 @@ WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via S
 
 
 //Secret data, change to your credentials!
-char ssid[] = "Board";     // your network SSID (name)
-char pass[] = "board123";    // your network password (use for WPA, or use as key for WEP)
-char token[] = "my_lichess_token"; // your lichess API token : Arduino_Lichess, botmokko2
+char ssid[] = "ssid";     // your network SSID (name)
+char pass[] = "passwort";    // your network password (use for WPA, or use as key for WEP)
+char token[] = "lichess_api_token"; // your lichess API token : Arduino_Lichess, botmokko2
 
 
 //lichess variables
@@ -38,7 +38,7 @@ bool is_game_running = false;
 
 
 // Debug Settings
-#define DEBUG true  //set to true for debug output, false for no debug output
+#define DEBUG false  //set to true for debug output, false for no debug output
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 void setup() {
@@ -56,15 +56,7 @@ void setup() {
   wifi_setup();
   
   DEBUG_SERIAL.println("\nStarting connection to server...");
-  
-  if (StreamClient.connect(server, 443))
-  {
-    getUsername(StreamClient);
-  }
-  else {
-    DEBUG_SERIAL.print("no connection to server");
-  }
-  
+
 }
 
 
@@ -96,13 +88,13 @@ void loop() {
         while(!myturn && is_game_running){
         
           //isr parses move stream once a second, exits when game ends or myturn is set to true
-          delay(100);
+          delay(300);
         }
         
-        if (myturn && is_game_running)
+        if (myturn && is_game_running && isr_first_run)
         { 
           //print last move if move was detected
-          if (lastMove.length() > 3 && isr_first_run){
+          if (lastMove.length() > 3){
             DEBUG_SERIAL.print("opponents move: ");
             DEBUG_SERIAL.println(lastMove);
 
@@ -125,5 +117,7 @@ void loop() {
         }
       }
     }
+    
+    StreamClient.stop();
   }
 }

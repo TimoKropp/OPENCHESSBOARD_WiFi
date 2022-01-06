@@ -7,6 +7,7 @@
 */
 void TC4_Handler(void)
 {
+
   if (is_booting)
   {
     displayBootWait();
@@ -14,7 +15,7 @@ void TC4_Handler(void)
   }
 
   if (is_connecting)
-  {
+  {   
     displayConnectWait();
     connect_flipstate = !connect_flipstate;
   }
@@ -23,7 +24,7 @@ void TC4_Handler(void)
   {
 
     char char_response[800] = {0};
-   
+     
     while (StreamClient.available()) {
       char_response[800] = {0};
       StreamClient.readBytesUntil('\n', char_response, sizeof(char_response));
@@ -66,7 +67,7 @@ void TC4_Handler(void)
     
     isr_first_run = true; // make sure isr is run once before finishing the main loop  
   }
-  
+  StreamClient.flush();
   TC4->COUNT16.INTFLAG.reg = TC_INTFLAG_OVF;             // Clear the OVF interrupt flag
 
 }
