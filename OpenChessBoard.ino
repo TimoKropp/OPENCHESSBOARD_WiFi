@@ -15,6 +15,9 @@ WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via S
 
 
 //Secret data, change to your credentials!
+char ssid[] = "your network SSID";     // your network SSID (name)
+char pass[] = "your network password";    // your network password 
+char token[] = "your lichess API token"; // your lichess API token 
 
 
 //lichess variables
