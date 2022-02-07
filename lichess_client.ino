@@ -17,37 +17,41 @@ void postMove(WiFiSSLClient &client) {
             
             TC4->COUNT16.CTRLA.bit.ENABLE = 0;
             
-            client.connect(server, 443);
-  
+            if(!client.connected()){
+              client.connect(server, 443); 
+            }
+            
             client.print("POST /api/board/game/");
             client.print((String)currentGameID);
             client.print("/move/");
             client.print(move_input);
-            client.println(" HTTP/1.0");
+            client.println(" HTTP/1.1");
             client.println("Host: lichess.org");
             client.print("Authorization: Bearer ");
             client.println(token);
-            client.println("Connection: keep-alive");
+            client.println("Connection: close");
             client.println();
-            delay(300);
+            delay(500);
             
-            processHTTP(client); 
-            
+            processHTTP(client);
+
             StaticJsonDocument<48> doc;
             DeserializationError error = deserializeJson(doc, client);
   
             client.stop();
-            TC4->COUNT16.CTRLA.bit.ENABLE = 1;
             
             //check for sucessful move
             boolean moveSuccess = false;
             moveSuccess = doc["ok"];
             if (moveSuccess == true) {
               DEBUG_SERIAL.println("move success!");
-              myturn = false;
+              myturn = false;  
+              client.connect(server, 443);
+              TC4->COUNT16.CTRLA.bit.ENABLE = 1; 
             }
             else
-            {                
+            {    
+                TC4->COUNT16.CTRLA.bit.ENABLE = 1;             
                 DEBUG_SERIAL.println("wrong move!");       
                 displayMove(myMove);
                 String reverse_move =  (String)myMove.charAt(2) 
@@ -63,6 +67,7 @@ void postMove(WiFiSSLClient &client) {
                 }
             }
           }
+          
 
 }
 
@@ -84,7 +89,7 @@ void getUsername(WiFiSSLClient &client){
 
     processHTTP(client);
 
-    DynamicJsonDocument doc(2048);
+    DynamicJsonDocument doc(1536);
     DeserializationError error = deserializeJson(doc, client);
     if (error)
     {
@@ -120,7 +125,7 @@ void getStream(WiFiSSLClient &client){
     client.println(token);
     client.println("Connection: close");
     client.println();
-    delay(1000);  
+    delay(100);  
   } 
 
 
@@ -139,7 +144,7 @@ void getGameID(WiFiSSLClient &client){
     
     processHTTP(client);
 
-    DynamicJsonDocument doc(2048);
+    DynamicJsonDocument doc(1536);
     DeserializationError error = deserializeJson(doc, client);
     if (error)
     {

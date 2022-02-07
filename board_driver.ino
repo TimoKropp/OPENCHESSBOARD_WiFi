@@ -15,6 +15,11 @@ int HALL_ROW_S2 = 3;  //D3
 
 int HALL_SENSE = A1;
 
+#define LED_BRIGHTNESS 100 // LED brightess in percent
+
+#define LED_DIM_VAL (255 - LED_BRIGHTNESS/100 * 255)  
+#define LED_OFF_VAL 255
+
 /* ---------------------------------------
  *  Function to initiate GPIOs.
  *  Defines GPIOs input and output states. 
@@ -26,6 +31,7 @@ void initHW(void) {
   pinMode(LED_MR_N_PIN, OUTPUT);
   pinMode(LED_CLOCK_PIN, OUTPUT);
   pinMode(LED_LATCH_PIN, OUTPUT);
+  pinMode(LED_OE_N_PIN, OUTPUT);
   pinMode(LED_OE_N_PIN, OUTPUT);
   pinMode(LED_DATA_PIN, OUTPUT);
 
@@ -252,10 +258,11 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 
   while (!is_move_finished && is_game_running) {
-    int k = 0;
+
     readHall(cur_hall_array2);
     delay(100);
     readHall(cur_hall_array3);
@@ -281,7 +288,8 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
   delay(300);
   
   return move_input;
@@ -305,7 +313,8 @@ void clearDisplay(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }
 
 
@@ -329,7 +338,8 @@ void displayConnectWait(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(connect_led_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }
 
 
@@ -391,7 +401,8 @@ void displayBootWait(void) {
   shiftOut(boot_led_array);
   DEBUG_SERIAL.println();
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }
 
 
@@ -409,5 +420,6 @@ void displayMove(String last_move) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 0);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }

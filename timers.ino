@@ -59,15 +59,15 @@ void TC4_Handler(void)
     if (lastMove != myMove)
     {
       myturn = true;
-      DEBUG_SERIAL.println("my turn!");
     }
     else{
       DEBUG_SERIAL.println("received move was played by me! (API response)");
     }
     
     isr_first_run = true; // make sure isr is run once before finishing the main loop  
+    
   }
-  StreamClient.flush();
+
   TC4->COUNT16.INTFLAG.reg = TC_INTFLAG_OVF;             // Clear the OVF interrupt flag
 
 }

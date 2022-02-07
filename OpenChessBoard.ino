@@ -15,9 +15,6 @@ WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via S
 
 
 //Secret data, change to your credentials!
-char ssid[] = "ssid";     // your network SSID (name)
-char pass[] = "passwort";    // your network password (use for WPA, or use as key for WEP)
-char token[] = "lichess_api_token"; // your lichess API token : Arduino_Lichess, botmokko2
 
 
 //lichess variables
@@ -26,26 +23,26 @@ const char* currentGameID;
 bool myturn = true;
 String lastMove;
 String myMove;
-
+bool is_castling_allowed = true;
 
 // LED and state variables
 bool boot_flipstate = true;
 bool is_booting = true;
-bool isr_first_run = false;;
+bool isr_first_run = false;
 bool connect_flipstate = false;
 bool is_connecting = false;
 bool is_game_running = false;
 
 
 // Debug Settings
-#define DEBUG false  //set to true for debug output, false for no debug output
+#define DEBUG true  //set to true for debug output, false for no debug output
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 void setup() {
   //Initialize HW
   initHW();
   isr_retup();
-
+  
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
   DEBUG_SERIAL.begin(9600);
@@ -64,9 +61,12 @@ void loop() {
 
   is_booting = false;
   is_connecting = true;
+  isr_first_run = false;
   lastMove = "xx";
   myMove = "ff";
-  
+
+  PostClient.connect(server, 443);
+
   if (StreamClient.connect(server, 443))
   {
     DEBUG_SERIAL.println("Find ongoing game");
@@ -76,9 +76,9 @@ void loop() {
     if (currentGameID != NULL)
     {
       DEBUG_SERIAL.println("Start move stream from game");
-      getStream(StreamClient);
+      getStream(StreamClient);    
       
-      //PostClient.connect(server, 443);
+      delay(500);// make sure first move is catched by isr
       
       is_game_running = true;
       is_connecting = false;
@@ -93,19 +93,25 @@ void loop() {
         
         if (myturn && is_game_running && isr_first_run)
         { 
+          String accept_move = "none";  
+           
           //print last move if move was detected
           if (lastMove.length() > 3){
             DEBUG_SERIAL.print("opponents move: ");
             DEBUG_SERIAL.println(lastMove);
 
             // wait for oppents move to be played
-            DEBUG_SERIAL.print("wait for move accept...");
-            String accept_move = "none";        
+            DEBUG_SERIAL.println("wait for move accept...");
+     
             while(accept_move != lastMove && is_game_running){
               displayMove(lastMove);
               accept_move = getMoveInput();
               }
-            DEBUG_SERIAL.print("move accepted!");
+              
+            // if king move is a castling move, wait for rook move
+            checkCastling(accept_move);
+            
+            DEBUG_SERIAL.println("move accepted!");
           }
           
           // run isr at least once to catch first move of the game
