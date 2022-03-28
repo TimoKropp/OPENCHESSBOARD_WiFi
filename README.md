@@ -27,14 +27,11 @@ Input your personal WiFi login credentials as well as your Lichess token.
 - Center squares blinking (searching for ongoing game)
 - All LEDs off (it is your move and it is the first move of the game)
 - Two squares light up  (it is your move but you need to input the last move played)
-- 
 ### 2. How to move
-- Pick and place
-When picking up the piece you want to move, the LED lights up where the piece was originally.
+- 	**Pick and place:**: When picking up the piece you want to move, the LED lights up where the piece was originally.
 You can keep the piece as long as you want in your hand and when you place it on the end square,
 the board registers this square by lighting up the LED. 
-- Slide
-While moving a piece via sliding, the board blocks all unintentional inputs until you keep the piece at rest for about 300ms.
+- 	**Slide:** While moving a piece via sliding, the board blocks all unintentional inputs until you keep the piece at rest for about 300ms.
 # Acknowledgements
 Without Lichess.org and their well documented [open-source API](https://lichess.org/api) this project would not be possible.
 Special thanks to the [Lichess-Link project](https://github.com/Kzra/Lichess-Link): A great introduction on how to implement a lichess-client on Arduino.
