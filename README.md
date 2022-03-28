@@ -20,6 +20,14 @@ Generate an API token [here](https://lichess.org/account/oauth/token).
 ### 5. Change your login data in OpenChessBoard.ino
 Input your personal WiFi login credentials as well as your Lichess token.
 
+## How to play
+### Blink patterns after power up
+#### All LEDs light up simultainiously (Hardware power-up)
+####  a4 blinking (connectiong to wifi)
+####  Center squares blinking (searching for ongoing game)
+#### All LEDs off (it is your move and it is the first move of the game)
+#### Two squares light up  (it is your move but you need to input the last move played)
+
 # Acknowledgements
 Without Lichess.org and their well documented [open-source API](https://lichess.org/api) this project would not be possible.
 Special thanks to the [Lichess-Link project](https://github.com/Kzra/Lichess-Link): A great introduction on how to implement a lichess-client on Arduino.
