@@ -13,12 +13,10 @@ char server[] = "lichess.org";  // name address for lichess (using DNS)
 WiFiSSLClient StreamClient; // WIFISSLClient for move stream, always connects via SSL (port 443 for https)
 WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via SSL (port 443 for https)
 
-
 //Secret data, change to your credentials!
-char ssid[] = "your network SSID";     // your network SSID (name)
+char ssid[] = "your network SSID";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
 char pass[] = "your network password";    // your network password 
 char token[] = "your lichess API token"; // your lichess API token 
-
 
 //lichess variables
 const char* username;
@@ -38,13 +36,15 @@ bool is_game_running = false;
 
 
 // Debug Settings
-#define DEBUG true  //set to true for debug output, false for no debug output
+#define DEBUG false
+//set to true for debug output, false for no debug output
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 void setup() {
   //Initialize HW
   initHW();
-  isr_retup();
+  isr_setup();
+ 
   
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
@@ -56,7 +56,6 @@ void setup() {
   wifi_setup();
   
   DEBUG_SERIAL.println("\nStarting connection to server...");
-
 }
 
 

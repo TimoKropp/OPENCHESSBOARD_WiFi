@@ -79,7 +79,7 @@ void TC4_Handler(void)
     @params[in] void
     @return void
 */
-void isr_retup(void) {
+void isr_setup(void) {
 
   GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN |                 // Enable GCLK0 for TC4 and TC5
                       GCLK_CLKCTRL_GEN_GCLK1 |             // Select GCLK0 at 48MHz
