@@ -46,7 +46,7 @@ You need to play the move in reverse as take back and if all LEDs are off again 
 ### 6. Unexpected issues
 - Only one square lights up below a piece you havent moved yet. 
 This means the piece was slightly misplaced and the board registers a wrong starting square as move input.
-Just lift the square up and wait until the led turns of. If all LEDs are off again, you can make your move as usual.
+Just lift the piece on that square and wait until the led turns off. If all LEDs are off again, you can make your move as usual.
 - The board keeps requesting take backs.
 This means you lost wifi connection and need to reconnect to wifi and the ongoing game. Unplug the board  wait 1 second and reconnect the power. 
 The board then reconnects again to the game and starts from the last known position.
