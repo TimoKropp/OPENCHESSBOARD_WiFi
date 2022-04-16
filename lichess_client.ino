@@ -16,11 +16,11 @@ void postMove(WiFiSSLClient &client) {
             myMove = move_input;
             
             TC4->COUNT16.CTRLA.bit.ENABLE = 0;
-            
+
             if(!client.connected()){
               client.connect(server, 443); 
             }
-            
+
             client.print("POST /api/board/game/");
             client.print((String)currentGameID);
             client.print("/move/");
@@ -31,21 +31,22 @@ void postMove(WiFiSSLClient &client) {
             client.println(token);
             client.println("Connection: close");
             client.println();
-            delay(500);
             
+            delay(500);
+
             processHTTP(client);
 
-            StaticJsonDocument<48> doc;
+            DynamicJsonDocument doc(1024);
             DeserializationError error = deserializeJson(doc, client);
-  
+
             client.stop();
-            
+              
             //check for sucessful move
             boolean moveSuccess = false;
             moveSuccess = doc["ok"];
             if (moveSuccess == true) {
               DEBUG_SERIAL.println("move success!");
-              myturn = false;  
+              myturn = false;
               client.connect(server, 443);
               TC4->COUNT16.CTRLA.bit.ENABLE = 1; 
             }
@@ -178,8 +179,8 @@ void processHTTP(WiFiSSLClient client) {
 
   // It should be "HTTP/1.0 200 OK"
   if (strcmp(status + 9, "200 OK") != 0) {
-    //DEBUG_SERIAL.print(F("Unexpected response: "));
-    //DEBUG_SERIAL.println(status);
+    DEBUG_SERIAL.print(F("Unexpected response: "));
+    DEBUG_SERIAL.println(status);
     if (strcmp(status + 9, "400 Bad Request") == 0) {
       //catch bad request
     }
@@ -190,7 +191,7 @@ void processHTTP(WiFiSSLClient client) {
   // Skip HTTP headers
   char endOfHeaders[] = "\r\n\r\n";
   if (!client.find(endOfHeaders)) {
-    //DEBUG_SERIAL.println(F("Invalid response"));
+    DEBUG_SERIAL.println(F("Invalid response"));
     return;
   }
 }
