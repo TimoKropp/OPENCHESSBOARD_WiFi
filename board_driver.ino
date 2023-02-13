@@ -21,6 +21,8 @@ int HALL_SENSE = A3;  //A3
 #define LED_DIM_VAL (255 - LED_BRIGHTNESS/100 * 255)  
 #define LED_OFF_VAL 255
 
+#define SENSE_THRS 200
+
 /* ---------------------------------------
  *  Function to initiate GPIOs.
  *  Defines GPIOs input and output states. 
@@ -97,111 +99,42 @@ void shiftOut(byte led_data_array[]) {
  *  @return void
 */   
 void readHall(byte read_hall_array[]) {
-  int row_index = 0;
-  int col_index = 0;
-  int sense_val = 0;
-  int sense_thrs = 200;
-  
+
+  int hall_val = 0;
+
   for (int k = 0; k < 8; k++) {
     read_hall_array[k] = 0x00;
   }
 
-  for (row_index = 0; row_index < 8; row_index++)
+  for (int row_index = 0; row_index < 8; row_index++)
   {
-    switch (row_index) {
-      case 0:
-        digitalWrite(HALL_ROW_S0, 0);
-        digitalWrite(HALL_ROW_S1, 0);
-        digitalWrite(HALL_ROW_S2, 0);
-        break;
-      case 1:
-        digitalWrite(HALL_ROW_S0, 1);
-        digitalWrite(HALL_ROW_S1, 0);
-        digitalWrite(HALL_ROW_S2, 0);
-        break;
-      case 2:
-        digitalWrite(HALL_ROW_S0, 0);
-        digitalWrite(HALL_ROW_S1, 1);
-        digitalWrite(HALL_ROW_S2, 0);
-        break;
-      case 3:
-        digitalWrite(HALL_ROW_S0, 1);
-        digitalWrite(HALL_ROW_S1, 1);
-        digitalWrite(HALL_ROW_S2, 0);
-        break;
-      case 4:
-        digitalWrite(HALL_ROW_S0, 0);
-        digitalWrite(HALL_ROW_S1, 0);
-        digitalWrite(HALL_ROW_S2, 1);
-        break;
-      case 5:
-        digitalWrite(HALL_ROW_S0, 1);
-        digitalWrite(HALL_ROW_S1, 0);
-        digitalWrite(HALL_ROW_S2, 1);
-        break;
-      case 6:
-        digitalWrite(HALL_ROW_S0, 0);
-        digitalWrite(HALL_ROW_S1, 1);
-        digitalWrite(HALL_ROW_S2, 1);
-        break;
-      case 7:
-        digitalWrite(HALL_ROW_S0, 1);
-        digitalWrite(HALL_ROW_S1, 1);
-        digitalWrite(HALL_ROW_S2, 1);
-        break;
-    }
-    for (col_index = 0; col_index < 8; col_index++) {
-      switch (col_index) {
-        case 0:
-          digitalWrite(HALL_OUT_S0, 0);
-          digitalWrite(HALL_OUT_S1, 0);
-          digitalWrite(HALL_OUT_S2, 0);
-          break;
-        case 1:
-          digitalWrite(HALL_OUT_S0, 1);
-          digitalWrite(HALL_OUT_S1, 0);
-          digitalWrite(HALL_OUT_S2, 0);
-          break;
-        case 2:
-          digitalWrite(HALL_OUT_S0, 0);
-          digitalWrite(HALL_OUT_S1, 1);
-          digitalWrite(HALL_OUT_S2, 0);
-          break;
-        case 3:
-          digitalWrite(HALL_OUT_S0, 1);
-          digitalWrite(HALL_OUT_S1, 1);
-          digitalWrite(HALL_OUT_S2, 0);
-          break;
-        case 4:
-          digitalWrite(HALL_OUT_S0, 0);
-          digitalWrite(HALL_OUT_S1, 0);
-          digitalWrite(HALL_OUT_S2, 1);
-          break;
-        case 5:
-          digitalWrite(HALL_OUT_S0, 1);
-          digitalWrite(HALL_OUT_S1, 0);
-          digitalWrite(HALL_OUT_S2, 1);
-          break;
-        case 6:
-          digitalWrite(HALL_OUT_S0, 0);
-          digitalWrite(HALL_OUT_S1, 1);
-          digitalWrite(HALL_OUT_S2, 1);
-          break;
-        case 7:
-          digitalWrite(HALL_OUT_S0, 1);
-          digitalWrite(HALL_OUT_S1, 1);
-          digitalWrite(HALL_OUT_S2, 1);
-          break;
-      }
-      delayMicroseconds(10);
-      sense_val = analogRead(HALL_SENSE);
-      delayMicroseconds(100);
-      if (sense_val < sense_thrs) {
+    bool bit0 = ((byte)row_index & (1 << 0)) != 0;
+    bool bit1 = ((byte)row_index & (1 << 1)) != 0;
+    bool bit2 = ((byte)row_index & (1 << 2)) != 0;
+    digitalWrite(HALL_ROW_S0, bit0);
+    digitalWrite(HALL_ROW_S1, bit1);
+    digitalWrite(HALL_ROW_S2, bit2);
+
+    for (int col_index = 0; col_index < 8; col_index++) {
+        bool bit0 = ((byte)col_index & (1 << 0)) != 0;
+        bool bit1 = ((byte)col_index & (1 << 1)) != 0;
+        bool bit2 = ((byte)col_index & (1 << 2)) != 0;
+        digitalWrite(HALL_OUT_S0, bit0);
+        digitalWrite(HALL_OUT_S1, bit1);
+        digitalWrite(HALL_OUT_S2, bit2);
+
+      //delayMicroseconds(10);
+      hall_val = analogRead(HALL_SENSE);
+      //delayMicroseconds(100);
+
+
+      if (hall_val < SENSE_THRS) {
         read_hall_array[row_index] |= 1UL << (col_index);
       }
+    }
 
     }
-  }
+
 }
 
 
@@ -215,88 +148,99 @@ void readHall(byte read_hall_array[]) {
 */  
 String getMoveInput(void) {
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-  String move_input;
- 
-  byte piece_pos_array[8];
-  byte cur_hall_array1[8];
-  byte cur_hall_array2[8];
-  byte cur_hall_array3[8];
-  byte led_test_array[8];
+
+  String mvInput;
+
+  byte hallBoardStateInit[8];
+  byte hallBoardState1[8];
+  byte hallBoardState2[8];
+  byte hallBoardState3[8];
+  byte ledBoardState[8];
 
   for (int k = 0; k < 8; k++) {
-    piece_pos_array[k] = 0x00;
-    cur_hall_array1[k] = 0x00;
-    cur_hall_array2[k] = 0x00;
-    cur_hall_array3[k] = 0x00;
-    led_test_array[k] = 0x00;
+    hallBoardStateInit[k] = 0x00;
+    hallBoardState1[k] = 0x00;
+    hallBoardState2[k] = 0x00;
+    hallBoardState3[k] = 0x00;
+    ledBoardState[k] = 0x00;
   }
 
-  bool is_move_started = false;
-  bool is_piece_placed = false;
-  bool is_move_finished = false;
+  bool mvStarted = false;
+  bool mvFinished = false;
 
 
   // get inital position
-  readHall(piece_pos_array);
+  readHall(hallBoardStateInit);
 
-  while (!is_move_started && is_game_running) {
-    readHall(cur_hall_array1);
+// wait for Start move event
+  while (!mvStarted) {
+    readHall(hallBoardState1);
 
     for (int row_index = 0; row_index < 8; row_index++) {
       for (int col_index = 0; col_index < 8; col_index++) {
 
-        int state1 = bitRead(piece_pos_array[row_index], col_index);
-        int state2 = bitRead(cur_hall_array1[row_index], col_index);
+        int state1 = bitRead(hallBoardStateInit[row_index], col_index);
+        int state2 = bitRead(hallBoardState1[row_index], col_index);
         if (state1  != state2) {
-          led_test_array[7 - row_index] |= 1UL << (7 - col_index);
-          move_input = move_input + (String)columns[7 - col_index] + (String)(7 - row_index + 1);
-          is_move_started = true;
+          ledBoardState[7 - row_index] |= 1UL << (7 - col_index);
+          #ifdef PLUG_AT_TOP
+          mvInput = mvInput + (String)columns[7 - col_index] + (String)(7 - row_index + 1);
+          #else
+          mvInput = mvInput + (String)columns[7-row_index] + (String)(col_index + 1);
+          #endif
+          mvStarted = true;
           break;
         }
       }
     }
   }
 
-  Serial.println("piece is moving");
   digitalWrite(LED_LATCH_PIN, 0);
-  shiftOut(led_test_array);
+  shiftOut(ledBoardState);
   digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 0);
   //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 
-  while (!is_move_finished && is_game_running) {
+// wait for end move event
+  while (!mvFinished ) {
+    readHall(hallBoardState2);
+    delay(100);
+    readHall(hallBoardState3);
+    delay(100);
 
-    readHall(cur_hall_array2);
-    delay(100);
-    readHall(cur_hall_array3);
-    delay(100);
     for (int row_index = 0; row_index < 8; row_index++) {
       for (int col_index = 0; col_index < 8; col_index++) {
 
-        int state_prev = bitRead(cur_hall_array1[row_index], col_index);
+        int state_prev = bitRead(hallBoardState1[row_index], col_index);
 
-        int state1 = bitRead(cur_hall_array2[row_index], col_index);
-        int state2 = bitRead(cur_hall_array3[row_index], col_index);
+        int hallBoardState1 = bitRead(hallBoardState2[row_index], col_index);
+        int hallBoardState2 = bitRead(hallBoardState3[row_index], col_index);
 
-        if ((state1 != state_prev) && (state2 != state_prev)) {
-          if (state1  == state2) {
-            is_move_finished = true;
-            led_test_array[7 - row_index] |= 1UL << (7 - col_index);
-            move_input = move_input + (String)columns[7 - col_index] + (String)(7 - row_index + 1);
+        if ((hallBoardState1 != state_prev) && (hallBoardState2 != state_prev)) {
+          if (hallBoardState1  == hallBoardState2) {
+            mvFinished = true;
+            ledBoardState[7 - row_index] |= 1UL << (7 - col_index);
+
+            #ifdef PLUG_AT_TOP
+            mvInput = mvInput + (String)columns[7 - col_index] + (String)(7 - row_index + 1);
+            #else
+            mvInput = mvInput + (String)columns[7-row_index] + (String)(col_index + 1);
+            #endif
           }
         }
       }
     }
   }
+  
   digitalWrite(LED_LATCH_PIN, 0);
-  shiftOut(led_test_array);
+  shiftOut(ledBoardState);
   digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 0);
   //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
   delay(300);
   
-  return move_input;
-  
+  return mvInput;
+
 }
 
 
@@ -385,8 +329,13 @@ void setDisplayMove(byte led_data_array[], String move_string) {
       row2 = k;
     }
   }
+#ifdef PLUG_AT_TOP
   led_data_array[row1] |= 1UL << col1;
   led_data_array[row2] |= 1UL << col2;
+#else
+  led_data_array[col1] |= 1UL << 7-row1;
+  led_data_array[col2] |= 1UL << 7-row2;
+#endif
 
 }
 

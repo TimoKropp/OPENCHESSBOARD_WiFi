@@ -126,7 +126,8 @@ void getStream(WiFiSSLClient &client){
     client.println(token);
     client.println("Connection: close");
     client.println();
-    delay(100);  
+    delay(500);  
+    processHTTP(client);
   } 
 
 

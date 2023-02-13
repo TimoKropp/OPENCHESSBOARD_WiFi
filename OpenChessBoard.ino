@@ -3,8 +3,9 @@
 */   
 
 //Includes
+#include <Arduino.h>
 #include <WiFiNINA.h>
-#include <ArduinoJson.h>
+#include "ArduinoJson-v6.19.4.h"
 
 
 // WiFi variables
@@ -14,9 +15,6 @@ WiFiSSLClient StreamClient; // WIFISSLClient for move stream, always connects vi
 WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via SSL (port 443 for https)
 
 //Secret data, change to your credentials!
-char ssid[] = "your network SSID";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
-char pass[] = "your network password";    // your network password 
-char token[] = "your lichess API token"; // your lichess API token 
 
 //lichess variables
 const char* username;
@@ -67,7 +65,8 @@ void loop() {
   myMove = "ff";
 
   PostClient.connect(server, 443);
-
+  DEBUG_SERIAL.println("\nConnected to Server...");
+  
   if (StreamClient.connect(server, 443))
   {
     DEBUG_SERIAL.println("Find ongoing game");
@@ -107,10 +106,13 @@ void loop() {
             while(accept_move != lastMove && is_game_running){
               displayMove(lastMove);
               accept_move = getMoveInput();
+
+              // if king move is a castling move, wait for rook move
+              checkCastling(accept_move);
+
               }
               
-            // if king move is a castling move, wait for rook move
-            checkCastling(accept_move);
+
             
             DEBUG_SERIAL.println("move accepted!");
           }
