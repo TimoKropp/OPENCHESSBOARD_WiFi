@@ -15,6 +15,9 @@ WiFiSSLClient StreamClient; // WIFISSLClient for move stream, always connects vi
 WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via SSL (port 443 for https)
 
 //Secret data, change to your credentials!
+char ssid[] = "my_network";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
+char pass[] = "my_password";    // your network password 
+char token[] = "my_lichess_API_token"; // your lichess API token 
 
 //lichess variables
 const char* username;
