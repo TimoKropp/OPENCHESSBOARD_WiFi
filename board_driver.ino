@@ -16,8 +16,6 @@ int HALL_ROW_S2 = A5;  //A5/D19
 
 int HALL_SENSE = A3;  //A3
 
-#define LED_BRIGHTNESS 100 // LED brightess in percent
-
 #define LED_DIM_VAL (255 - LED_BRIGHTNESS/100 * 255)  
 #define LED_OFF_VAL 255
 
@@ -198,8 +196,11 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(ledBoardState);
   digitalWrite(LED_LATCH_PIN, 1);
+  #ifdef LED_BRIGHTNESS
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #elif
   digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #endif
 
 // wait for end move event
   while (!mvFinished ) {
@@ -235,8 +236,12 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(ledBoardState);
   digitalWrite(LED_LATCH_PIN, 1);
+  #ifdef LED_BRIGHTNESS
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #elif
   digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #endif
+  
   delay(300);
   
   return mvInput;
@@ -262,7 +267,6 @@ void clearDisplay(void) {
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 1);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }
 
 
@@ -289,8 +293,11 @@ void displayConnectWait(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(connect_led_array);
   digitalWrite(LED_LATCH_PIN, 1);
+  #ifdef LED_BRIGHTNESS
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #elif
   digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #endif
 }
 
 
@@ -358,8 +365,11 @@ void displayBootWait(void) {
   shiftOut(boot_led_array);
   DEBUG_SERIAL.println();
   digitalWrite(LED_LATCH_PIN, 1);  
+  #ifdef LED_BRIGHTNESS
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #elif
   digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #endif
 }
 
 
@@ -380,6 +390,9 @@ void displayMove(String last_move) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
+  #ifdef LED_BRIGHTNESS
+  analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #elif
   digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  #endif
 }

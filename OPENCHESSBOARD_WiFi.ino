@@ -1,23 +1,39 @@
 /* ---------------------------------------
- * This is the main file of the OpenChessBoard firmware v1.0.0
+ * This is the main file of the OpenChessBoard firmware v1.1
 */   
-
 //Includes
 #include <Arduino.h>
 #include <WiFiNINA.h>
 #include "ArduinoJson-v6.19.4.h"
+/* 
+------------------------------------------------------------
+User Settings START
+Only change this part of the code for standard use
+------------------------------------------------------------
+*/
+//Secret data, change to your credentials!
+char ssid[] = "my_network";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
+char pass[] = "my_password";    // your network password 
+char token[] = "my_lichess_API_token"; // your lichess API token
+/*Note: When generating your token, make sure to provide all rights (all sliders set to green) */
 
+#define LED_BRIGHTNESS 100 // LED brightess in percent.Note: change is not linear (mostly adjustable between 90...100)
+/*
+ * The standard orientation of the OPENCHESSBOARD is when the USB-Plug is on the right,
+ * You can change the orientation by using the following define
+*/
+// #define PLUG_AT_TOP
 
+/* 
+------------------------------------------------------------
+User Settings END
+------------------------------------------------------------
+*/
 // WiFi variables
 int status = WL_IDLE_STATUS;
 char server[] = "lichess.org";  // name address for lichess (using DNS)
 WiFiSSLClient StreamClient; // WIFISSLClient for move stream, always connects via SSL (port 443 for https)
 WiFiSSLClient PostClient; // WIFISSLClient for post moves, always connects via SSL (port 443 for https)
-
-//Secret data, change to your credentials!
-char ssid[] = "my_network";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
-char pass[] = "my_password";    // your network password 
-char token[] = "my_lichess_API_token"; // your lichess API token 
 
 //lichess variables
 const char* username;
