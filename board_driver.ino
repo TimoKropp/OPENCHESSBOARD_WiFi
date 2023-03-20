@@ -198,7 +198,7 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 1);
   #ifdef LED_BRIGHTNESS
   analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
-  #elif
+  #else
   digitalWrite(LED_OE_N_PIN , 0);
   #endif
 
@@ -238,7 +238,7 @@ String getMoveInput(void) {
   digitalWrite(LED_LATCH_PIN, 1);
   #ifdef LED_BRIGHTNESS
   analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
-  #elif
+  #else
   digitalWrite(LED_OE_N_PIN , 0);
   #endif
   
@@ -295,7 +295,7 @@ void displayConnectWait(void) {
   digitalWrite(LED_LATCH_PIN, 1);
   #ifdef LED_BRIGHTNESS
   analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
-  #elif
+  #else
   digitalWrite(LED_OE_N_PIN , 0);
   #endif
 }
@@ -367,7 +367,7 @@ void displayBootWait(void) {
   digitalWrite(LED_LATCH_PIN, 1);  
   #ifdef LED_BRIGHTNESS
   analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
-  #elif
+  #else
   digitalWrite(LED_OE_N_PIN , 0);
   #endif
 }
@@ -392,7 +392,7 @@ void displayMove(String last_move) {
   digitalWrite(LED_LATCH_PIN, 1);
   #ifdef LED_BRIGHTNESS
   analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
-  #elif
+  #else
   digitalWrite(LED_OE_N_PIN , 0);
   #endif
 }
