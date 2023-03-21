@@ -14,6 +14,9 @@ Only change this part of the code for standard use
 ------------------------------------------------------------
 */
 //Secret data, change to your credentials!
+char ssid[] = "my_network";     // your network SSID (name), must be 2.4 GHz WiFi!!!
+char pass[] = "my_password";    // your network password 
+char token[] = "my_lichess_API_token"; // your lichess API token
 /*Note: When generating your token, make sure to provide all rights (all sliders set to green) */
 
 /*
