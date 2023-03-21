@@ -15,7 +15,7 @@ void postMove(WiFiSSLClient &client) {
           
             myMove = move_input;
             
-            TC4->COUNT16.CTRLA.bit.ENABLE = 0;
+            TC4->COUNT32.CTRLA.bit.ENABLE = 0;
 
             if(!client.connected()){
               client.connect(server, 443); 
@@ -48,11 +48,11 @@ void postMove(WiFiSSLClient &client) {
               DEBUG_SERIAL.println("move success!");
               myturn = false;
               client.connect(server, 443);
-              TC4->COUNT16.CTRLA.bit.ENABLE = 1; 
+              TC4->COUNT32.CTRLA.bit.ENABLE = 1; 
             }
             else
             {    
-                TC4->COUNT16.CTRLA.bit.ENABLE = 1;             
+                TC4->COUNT32.CTRLA.bit.ENABLE = 1;             
                 DEBUG_SERIAL.println("wrong move!");       
                 displayMove(myMove);
                 String reverse_move =  (String)myMove.charAt(2) 
