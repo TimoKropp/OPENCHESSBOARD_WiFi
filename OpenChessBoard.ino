@@ -14,12 +14,8 @@ Only change this part of the code for standard use
 ------------------------------------------------------------
 */
 //Secret data, change to your credentials!
-char ssid[] = "my_network";     // your network SSID (name), you can also create a WiFi hotspot with 2.4GHz
-char pass[] = "my_password";    // your network password 
-char token[] = "my_lichess_API_token"; // your lichess API token
 /*Note: When generating your token, make sure to provide all rights (all sliders set to green) */
 
-#define LED_BRIGHTNESS 100 // LED brightess in percent.Note: change is not linear (mostly adjustable between 90...100)
 /*
  * The standard orientation of the OPENCHESSBOARD is when the USB-Plug is on the right,
  * You can change the orientation by using the following define
