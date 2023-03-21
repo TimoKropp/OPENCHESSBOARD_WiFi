@@ -261,7 +261,7 @@ void clearDisplay(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(led_test_array);
   digitalWrite(LED_LATCH_PIN, 1);
-  digitalWrite(LED_OE_N_PIN , 1);
+  //digitalWrite(LED_OE_N_PIN , 1);
   //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
 }
 
@@ -350,16 +350,23 @@ void displayBootWait(void) {
   byte boot_led_array[8] = {0};
 
   if (boot_flipstate) {
+    #ifdef PLUG_AT_TOP
+    boot_led_array[0] = 0x10;
+    #else
     boot_led_array[3] = 0x01;
+    #endif
   }
 
-  digitalWrite(LED_OE_N_PIN , 1);
+  //digitalWrite(LED_OE_N_PIN , 1);
+  digitalWrite(LED_MR_N_PIN, 0);
+  digitalWrite(LED_MR_N_PIN, 1);
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(boot_led_array);
   DEBUG_SERIAL.println();
   digitalWrite(LED_LATCH_PIN, 1);  
-  digitalWrite(LED_OE_N_PIN , 0);
-  //analogWrite(LED_OE_N_PIN , LED_DIM_VAL);
+  analogWrite(LED_OE_N_PIN , 245);
+  //digitalWrite(LED_OE_N_PIN , 0);
+  delay(100);
 }
 
 
