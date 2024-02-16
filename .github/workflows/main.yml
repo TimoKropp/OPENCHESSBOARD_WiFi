@@ -1,0 +1,20 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  compile-sketch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: arduino/compile-sketches@v1
+        with:
+          fqbn: arduino:samd:nano_33_iot
+          libraries: |
+            - name: WiFiNINA
+          sketch-paths: |
+            - .
