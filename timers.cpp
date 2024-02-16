@@ -1,3 +1,5 @@
+#include "timers.h"
+
 /* ---------------------------------------
     interupt handler function. Changes LED states for booting and connection sequence.
     When game is running, this function periodically checks for the game status from
@@ -5,7 +7,7 @@
     @params[in] void
     @return void
 */
-void TC4_Handler(void)
+void TC4_Handler()
 {
 
   if (is_booting)
@@ -15,7 +17,7 @@ void TC4_Handler(void)
   }
 
   if (is_connecting)
-  {   
+  {
     displayConnectWait();
     connect_flipstate = !connect_flipstate;
   }
@@ -24,7 +26,7 @@ void TC4_Handler(void)
   {
 
     char char_response[800] = {0};
-     
+
     while (StreamClient.available()) {
       char_response[800] = {0};
       StreamClient.readBytesUntil('\n', char_response, sizeof(char_response));
@@ -47,7 +49,7 @@ void TC4_Handler(void)
       myturn = true;
       isr_first_run = false;
     }
-    
+
     if (moves.length() > 3)
     {
       DEBUG_SERIAL.print("move received: ");
@@ -63,9 +65,9 @@ void TC4_Handler(void)
     else{
       DEBUG_SERIAL.println("received move was played by me! (API response)");
     }
-    
-    isr_first_run = true; // make sure isr is run once before finishing the main loop  
-    
+
+    isr_first_run = true; // make sure isr is run once before finishing the main loop
+
   }
 
   TC4->COUNT32.INTFLAG.reg = TC_INTFLAG_OVF;             // Clear the OVF interrupt flag
@@ -79,7 +81,7 @@ void TC4_Handler(void)
     @params[in] void
     @return void
 */
-void isr_setup(void) {
+void isr_setup() {
 
   GCLK->CLKCTRL.reg = GCLK_CLKCTRL_CLKEN |                 // Enable GCLK0 for TC4 and TC5
                       GCLK_CLKCTRL_GEN_GCLK1 |             // Select GCLK0 at 48MHz

@@ -1,6 +1,11 @@
+#include "lichess_client.h"
+
+// Unexported functions
+void processHTTP(WiFiSSLClient client);
+
 /* ---------------------------------------
  *  Function to send post move request to Lichess API.
- *  Restarts client and stops client after request 
+ *  Restarts client and stops client after request
  *  @params[in] WiFiSSLClient
  *  @return void
 */
@@ -12,13 +17,13 @@ void postMove(WiFiSSLClient &client) {
             clearDisplay();
             DEBUG_SERIAL.print("my move: ");
             DEBUG_SERIAL.println(move_input);
-          
+
             myMove = move_input;
-            
+
             TC4->COUNT32.CTRLA.bit.ENABLE = 0;
 
             if(!client.connected()){
-              client.connect(server, 443); 
+              client.connect(server, 443);
             }
 
             client.print("POST /api/board/game/");
@@ -31,7 +36,7 @@ void postMove(WiFiSSLClient &client) {
             client.println(token);
             client.println("Connection: close");
             client.println();
-            
+
             delay(500);
 
             processHTTP(client);
@@ -40,7 +45,7 @@ void postMove(WiFiSSLClient &client) {
             DeserializationError error = deserializeJson(doc, client);
 
             client.stop();
-              
+
             //check for sucessful move
             boolean moveSuccess = false;
             moveSuccess = doc["ok"];
@@ -48,27 +53,27 @@ void postMove(WiFiSSLClient &client) {
               DEBUG_SERIAL.println("move success!");
               myturn = false;
               client.connect(server, 443);
-              TC4->COUNT32.CTRLA.bit.ENABLE = 1; 
+              TC4->COUNT32.CTRLA.bit.ENABLE = 1;
             }
             else
-            {    
-                TC4->COUNT32.CTRLA.bit.ENABLE = 1;             
-                DEBUG_SERIAL.println("wrong move!");       
+            {
+                TC4->COUNT32.CTRLA.bit.ENABLE = 1;
+                DEBUG_SERIAL.println("wrong move!");
                 displayMove(myMove);
-                String reverse_move =  (String)myMove.charAt(2) 
+                String reverse_move =  (String)myMove.charAt(2)
                 +  (String)myMove.charAt(3)
                 +  (String)myMove.charAt(0)
                 +  (String)myMove.charAt(1);
-                
-                DEBUG_SERIAL.println(reverse_move);   
-                
+
+                DEBUG_SERIAL.println(reverse_move);
+
                 while(reverse_move != move_input && is_game_running){
                   move_input = getMoveInput();
-                  DEBUG_SERIAL.println(move_input);  
+                  DEBUG_SERIAL.println(move_input);
                 }
             }
           }
-          
+
 
 }
 
@@ -86,7 +91,7 @@ void getUsername(WiFiSSLClient &client){
     // Include an authorisation header with the lichess API token
     client.print("Authorization: Bearer ");
     client.println(token);
-    delay(100); 
+    delay(100);
 
     processHTTP(client);
 
@@ -102,7 +107,7 @@ void getUsername(WiFiSSLClient &client){
 
     username = doc["username"];
     DEBUG_SERIAL.println(username);
-    
+
     //close request
     client.println("Connection: close");
     client.println();
@@ -116,7 +121,7 @@ void getUsername(WiFiSSLClient &client){
  *  Starts the move stream on client.
  *  @params[in] WiFiSSLClient
  *  @return void
-*/  
+*/
 void getStream(WiFiSSLClient &client){
     client.print("GET /api/board/game/stream/");
     client.print((String)currentGameID);
@@ -126,9 +131,9 @@ void getStream(WiFiSSLClient &client){
     client.println(token);
     client.println("Connection: close");
     client.println();
-    delay(500);  
+    delay(500);
     processHTTP(client);
-  } 
+  }
 
 
 /* ---------------------------------------
@@ -136,14 +141,14 @@ void getStream(WiFiSSLClient &client){
  *  If game is found, global variable currentGameID is set  and sets turn global variable myturn
  *  @params[in] WiFiSSLClient
  *  @return void
-*/       
+*/
 void getGameID(WiFiSSLClient &client){
     client.println("GET /api/account/playing HTTP/1.1");
     client.println("Host: lichess.org");
     client.print("Authorization: Bearer ");
     client.println(token);
-    delay(100); 
-    
+    delay(100);
+
     processHTTP(client);
 
     DynamicJsonDocument doc(1536);
@@ -159,7 +164,7 @@ void getGameID(WiFiSSLClient &client){
     JsonObject nowPlaying_0_opponent = nowPlaying_0["opponent"];
     currentGameID = nowPlaying_0["gameId"];
     myturn = nowPlaying_0["isMyTurn"];
-    
+
     DEBUG_SERIAL.println(currentGameID);
 }
 
@@ -169,7 +174,7 @@ void getGameID(WiFiSSLClient &client){
  *  Generic function that checks for http status and skips headers
  *  @params[in] WiFiSSLClient
  *  @return void
-*/   
+*/
 void processHTTP(WiFiSSLClient client) {
   if (client.println() == 0) {
     return;

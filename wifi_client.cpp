@@ -1,12 +1,14 @@
+#include "wifi_client.h"
+
 /* ---------------------------------------
- *  setup function for wifi module. 
- *  Checks for wifi firmware  update 
+ *  setup function for wifi module.
+ *  Checks for wifi firmware  update
  *  and connects wifi module to network.
  *  @params[in] void
  *  @return void
 */
-void wifi_setup(void){
-  
+void wifi_setup(){
+
   // check for the WiFi module:
   if (WiFi.status() == WL_NO_MODULE) {
     DEBUG_SERIAL.println("Communication with WiFi module failed!");
@@ -14,9 +16,9 @@ void wifi_setup(void){
     // don't continue
     while (true);
   }
-  
+
   String fv = WiFi.firmwareVersion();
-  
+
   if (fv < WIFI_FIRMWARE_LATEST_VERSION) {
     DEBUG_SERIAL.println("Please upgrade the firmware");
   }
@@ -41,9 +43,9 @@ void wifi_setup(void){
  *  function to print wifi status.
  *  @params[in] void
  *  @return void
- *  
+ *
 */
-void printWiFiStatus(void) {
+void printWiFiStatus() {
   // print the SSID of the network you're attached to:
   DEBUG_SERIAL.print("SSID: ");
   DEBUG_SERIAL.println(WiFi.SSID());

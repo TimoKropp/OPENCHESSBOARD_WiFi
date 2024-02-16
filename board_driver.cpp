@@ -1,9 +1,11 @@
+#include "board_driver.h"
+
 //HW GPIO configuration
 
 int LED_MR_N_PIN = 4; // RESET, D4
 int LED_CLOCK_PIN = 6; //SHCP, D5
-int LED_LATCH_PIN = 5; //STCP, D6 
-int LED_OE_N_PIN = 3; // D3 
+int LED_LATCH_PIN = 5; //STCP, D6
+int LED_OE_N_PIN = 3; // D3
 int LED_DATA_PIN = 2; //D2
 
 int HALL_OUT_S0 = 10; //D10
@@ -20,17 +22,17 @@ int HALL_SENSE = A3;  //A3
 
 /* ---------------------------------------
  *  Function to initiate GPIOs.
- *  Defines GPIOs input and output states. 
+ *  Defines GPIOs input and output states.
  *  Depends on Arduino HW (adapt HW GPIO configuration to match Arduino Board)
  *  @params[in] void
  *  @return void
-*/   
-void initHW(void) {
+*/
+void initHW() {
   pinMode(LED_MR_N_PIN, OUTPUT);
   pinMode(LED_OE_N_PIN, OUTPUT);
   digitalWrite(LED_MR_N_PIN, 0);
   digitalWrite(LED_OE_N_PIN, 1);
-  
+
   pinMode(LED_CLOCK_PIN, OUTPUT);
   pinMode(LED_LATCH_PIN, OUTPUT);
   pinMode(LED_DATA_PIN, OUTPUT);
@@ -55,7 +57,7 @@ void initHW(void) {
  *  Activates LEDs immediately.
  *  @params[in] byte array (max size 8 bytes)
  *  @return void
-*/   
+*/
 void shiftOut(byte led_data_array[]) {
 
   bool pinStateEN;
@@ -76,7 +78,7 @@ void shiftOut(byte led_data_array[]) {
       else {
         pinStateEN = 0;
       }
-      
+
       digitalWrite(LED_DATA_PIN, pinStateEN);
       digitalWrite(LED_CLOCK_PIN, 1);
       digitalWrite(LED_DATA_PIN, 0);
@@ -92,7 +94,7 @@ void shiftOut(byte led_data_array[]) {
  *  Multiplexing all sensors. Sets 0 or 1 n array if threshold is exceeded.
  *  @params[in] byte array (max size 8 bytes)
  *  @return void
-*/   
+*/
 void readHall(byte read_hall_array[]) {
 
   int hall_val = 0;
@@ -135,13 +137,13 @@ void readHall(byte read_hall_array[]) {
 
 /* ---------------------------------------
  *  Function that waits for a move input.
- *  Waits for a move input (blocking, but can be exited by isr if game is set to be not running) 
+ *  Waits for a move input (blocking, but can be exited by isr if game is set to be not running)
  *  and returns move string.
  *  Example move: e2e4(piece moves from e2 to e4)
  *  @params[in] void
  *  @return String move_input
-*/  
-String getMoveInput(void) {
+*/
+String getMoveInput() {
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
 
   String mvInput;
@@ -225,13 +227,13 @@ String getMoveInput(void) {
       }
     }
   }
-  
+
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(ledBoardState);
   digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 0);
   delay(300);
-  
+
   return mvInput;
 
 }
@@ -242,10 +244,10 @@ String getMoveInput(void) {
  * Writes 0 to shift registers for all LEDs.
  *  @params[in] void
  *  @return void
-*/  
-void clearDisplay(void) {
+*/
+void clearDisplay() {
   byte led_test_array[8];
-  
+
   for (int k = 0; k < 8; k++) {
     led_test_array[k] = 0x00;
   }
@@ -263,8 +265,8 @@ void clearDisplay(void) {
  *  Writes to specific shift registers and flips states periodically by isr.
  *  @params[in] void
  *  @return void
-*/  
-void displayConnectWait(void) {
+*/
+void displayConnectWait() {
   byte connect_led_array[8] = {0};
 
   if (connect_flipstate) {
@@ -290,7 +292,7 @@ void displayConnectWait(void) {
  *  Writes move input to led array.
  *  @params[in] byte array, string move
  *  @return void
-*/  
+*/
 void setDisplayMove(byte led_data_array[], String move_string) {
 
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
@@ -324,8 +326,8 @@ void setDisplayMove(byte led_data_array[], String move_string) {
   led_data_array[row1] |= 1UL << col1;
   led_data_array[row2] |= 1UL << col2;
 #else
-  led_data_array[col1] |= 1UL << 7-row1;
-  led_data_array[col2] |= 1UL << 7-row2;
+  led_data_array[col1] |= 1UL << (7-row1);
+  led_data_array[col2] |= 1UL << (7-row2);
 #endif
 
 }
@@ -336,8 +338,8 @@ void setDisplayMove(byte led_data_array[], String move_string) {
  *  Writes to specific shift registers and flips states periodically by isr.
  *  @params[in] void
  *  @return void
-*/  
-void displayBootWait(void) {
+*/
+void displayBootWait() {
   byte boot_led_array[8] = {0};
 
   if (boot_flipstate) {
@@ -354,7 +356,7 @@ void displayBootWait(void) {
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(boot_led_array);
   DEBUG_SERIAL.println();
-  digitalWrite(LED_LATCH_PIN, 1);  
+  digitalWrite(LED_LATCH_PIN, 1);
   digitalWrite(LED_OE_N_PIN , 0);
   delay(100);
 }
@@ -365,7 +367,7 @@ void displayBootWait(void) {
  *  Writes to specific shift registers and show start and end position of piece movement.
  *  @params[in] string move
  *  @return void
-*/  
+*/
 void displayMove(String last_move) {
   byte led_test_array[8] = {0};
 

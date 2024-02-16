@@ -1,11 +1,4 @@
-/* ---------------------------------------
- * This is the main file of the OpenChessBoard firmware v1.0.0
-*/   
-
-//Includes
-#include <Arduino.h>
-#include <WiFiNINA.h>
-#include "ArduinoJson-v6.19.4.h"
+#include "OpenChessBoard.h"
 
 /*
 ------------------------------------------------------------
@@ -15,7 +8,7 @@ Only change this part of the code for standard use
 */
 //Secret data, change to your credentials!
 char ssid[] = "my_network";     // your network SSID (name), must be 2.4 GHz WiFi!!!
-char pass[] = "my_password";    // your network password 
+char pass[] = "my_password";    // your network password
 char token[] = "my_lichess_API_token"; // your lichess API token
 /*Note: When generating your token, make sure to provide all rights (all sliders set to green) */
 
@@ -25,7 +18,7 @@ char token[] = "my_lichess_API_token"; // your lichess API token
 */
 //#define PLUG_AT_TOP
 
-/* 
+/*
 ------------------------------------------------------------
 User Settings END
 ------------------------------------------------------------
@@ -53,26 +46,21 @@ bool connect_flipstate = false;
 bool is_connecting = false;
 bool is_game_running = false;
 
-
-// Debug Settings
-#define DEBUG false  //set to true for debug output, false for no debug output
-#define DEBUG_SERIAL if(DEBUG)Serial
-
 void setup() {
   //Initialize HW
   initHW();
   isr_setup();
- 
-  
+
+
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
   DEBUG_SERIAL.begin(9600);
   delay(1000);
   while (!Serial);
-#endif  
+#endif
 
   wifi_setup();
-  
+
   DEBUG_SERIAL.println("\nStarting connection to server...");
 }
 
@@ -87,35 +75,35 @@ void loop() {
 
   PostClient.connect(server, 443);
   DEBUG_SERIAL.println("\nConnected to Server...");
-  
+
   if (StreamClient.connect(server, 443))
   {
     DEBUG_SERIAL.println("Find ongoing game");
-    
+
     getGameID(StreamClient); // checks whos turn it is
 
     if (currentGameID != NULL)
     {
       DEBUG_SERIAL.println("Start move stream from game");
-      getStream(StreamClient);    
-      
+      getStream(StreamClient);
+
       delay(500);// make sure first move is catched by isr
-      
+
       is_game_running = true;
       is_connecting = false;
-        
+
       while (is_game_running)
-      {   
+      {
         while(!myturn && is_game_running){
-        
+
           //isr parses move stream once a second, exits when game ends or myturn is set to true
           delay(300);
         }
-        
+
         if (myturn && is_game_running && isr_first_run)
-        { 
-          String accept_move = "none";  
-           
+        {
+          String accept_move = "none";
+
           //print last move if move was detected
           if (lastMove.length() > 3){
             DEBUG_SERIAL.print("opponents move: ");
@@ -123,7 +111,7 @@ void loop() {
 
             // wait for oppents move to be played
             DEBUG_SERIAL.println("wait for move accept...");
-     
+
             while(accept_move != lastMove && is_game_running){
               displayMove(lastMove);
               accept_move = getMoveInput();
@@ -132,22 +120,22 @@ void loop() {
               checkCastling(accept_move);
 
               }
-              
 
-            
+
+
             DEBUG_SERIAL.println("move accepted!");
           }
-          
+
           // run isr at least once to catch first move of the game
           if(isr_first_run){
-            //wait for my move and send it to API   
-            DEBUG_SERIAL.print("wait for move input...");         
+            //wait for my move and send it to API
+            DEBUG_SERIAL.print("wait for move input...");
             postMove(PostClient);
           }
         }
       }
     }
-    
+
     StreamClient.stop();
   }
 }
