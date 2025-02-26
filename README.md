@@ -18,13 +18,14 @@ You can checkout this video to see how it works:
 [BLE/App demo](https://www.youtube.com/watch?v=-bQ3twI99CM)
 
 <img src="data/demo.png" alt="access point" width="300"/>
+
 # Mode Selection
 You can select the startup-method by placing all peaces in the starting positon and remove one piece to select the mode.
 The image shows the example for selecting game mode A.
 You can choose between the following modes:
-- A: Start the board in stand-alone mode with WiFi connectivity
-- B: Start the board in App mode with BLE connectivity to the Blichess App.
-- C: Start the board in configration mode which starts hosting the accesspoint: http://openchessboard.local
+  -**A: Start the board in stand-alone mode with WiFi connectivity
+  -**B: Start the board in App mode with BLE connectivity to the Blichess App.
+  -**C: Start the board in configration mode which starts hosting the accesspoint: http://openchessboard.local
 <img src="data/game_modes.png" alt="game mode" width="300"/>
 
 # Requirements
