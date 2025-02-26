@@ -173,6 +173,7 @@ int countQueens(byte hallBoardState[]) {
 }
 
 void run_queen_puzzle(void) {
+    dimLEDs = true;
     while (true) {
         static bool flickeringShown = false; 
         byte hallBoardState[8];  
