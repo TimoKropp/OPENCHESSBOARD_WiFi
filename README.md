@@ -25,7 +25,7 @@ You can choose between the following modes:
 - A: Start the board in stand-alone mode with WiFi connectivity
 - B: Start the board in App mode with BLE connectivity to the Blichess App.
 - C: Start the board in configration mode which starts hosting the accesspoint: http://openchessboard.local
-<img src="data/game_mode.png" alt="game mode" width="300"/>
+<img src="data/game_modes.png" alt="game mode" width="300"/>
 
 # Requirements
 This project runs on Arduino Nano esp32 with the OPENCHESSBOARD hardware.
