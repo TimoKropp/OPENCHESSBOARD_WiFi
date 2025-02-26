@@ -18,7 +18,7 @@ int HALL_ROW_S2 = A5;  //A5/D19
 
 int HALL_SENSE = A3;  //A3
 
-#define SENSE_THRS 200
+#define SENSE_THRS 600
 
 /* ---------------------------------------
  *  Function to initiate GPIOs.
@@ -112,7 +112,7 @@ void readHall(byte read_hall_array[]) {
     digitalWrite(HALL_ROW_S0, bit0);
     digitalWrite(HALL_ROW_S1, bit1);
     digitalWrite(HALL_ROW_S2, bit2);
-
+    delayMicroseconds(500);
     for (int col_index = 0; col_index < 8; col_index++) {
 
         bool bit0 = ((byte)col_index & (1 << 0)) != 0;
@@ -122,11 +122,11 @@ void readHall(byte read_hall_array[]) {
         digitalWrite(HALL_OUT_S1, bit1);
         digitalWrite(HALL_OUT_S2, bit2);
         
-      delay(1);
+      delayMicroseconds(300);
       hall_val = analogRead(HALL_SENSE);
-      //DEBUG_SERIAL.println(hall_val);
+      delayMicroseconds(300);
  
-      if (hall_val == 0) {
+      if (hall_val < SENSE_THRS) {
         read_hall_array[row_index] |= 1UL << (col_index);
       }
     }
