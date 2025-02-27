@@ -26,7 +26,7 @@ The image shows the example for selecting game mode A.
 You can choose between the following modes:  <br>
   - **A:** Start the board in stand-alone mode with WiFi connectivity <br>
   - **B:** Start the board in App mode with BLE connectivity to the Blichess App.   <br>
-  - **C:** Start the board in configuration mode which starts hosting the accesspoint: http://openchessboard.local  <br>
+  - **C:**  Start the board in configuration mode which starts hosting a WiFi accesspoint: connect to the "OCB" WiFi and connect to http://openchessboard.local in your browser.
   
 
 
