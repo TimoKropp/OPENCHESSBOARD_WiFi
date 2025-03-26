@@ -188,57 +188,66 @@ String parseValueFromResponse(const char* response, const char* key) {
 }
 
 void postNewGame(WiFiClientSecure &client, String board_gameMode) {
-    // Define the URL for the Lichess API to create a new game
-    String rated_str = "false";
-    String variant = "standard";
-    String ratingRange = "";    // Optional, you can set this if needed
-    String days_str = "";       // Default for correspondence games (set to 1 by default)
-    String initialStr;
-    String incrementStr;
-
-    int plusPos = board_gameMode.indexOf('+');
-    if (plusPos != -1) {
-        // Extract the initial and increment times
-        initialStr = board_gameMode.substring(0, plusPos);
-        incrementStr = board_gameMode.substring(plusPos + 1);
-    } else {
-        Serial.println("Invalid time control format.");
-        return;
-    }
-
-
-  // Prepare the JSON body
-    String plainTextBody = "rated=" + rated_str + 
-                           "\ntime=" + initialStr + 
-                           "\nincrement=" + incrementStr + 
-                           "\ndays=" + days_str +  
-                           "\nvariant=" + variant + 
-                           "\nratingRange=" + variant; 
-
-
-
-  // Make sure your client is connected
-  if (!client.connected()) {
-      client.connect(server, 443);
+  String rated_str = "false";
+  String variant = "standard";
+  String ratingRange = "";    // Optional
+  String days_str = "";       // Default for correspondence games
+  String initialStr;
+  String incrementStr;
+  String plainTextBody;
+  String endpoint;
+  
+  if (board_gameMode.startsWith("AI level ")) {
+      // AI Challenge Mode
+      int level = board_gameMode.substring(9).toInt();
+      if (level < 1 || level > 8) {
+          DEBUG_SERIAL.println("Invalid AI level.");
+          return;
+      }
+      
+      endpoint = "/api/challenge/ai";
+      plainTextBody = "level=" + String(level) + "\nrated=" + rated_str + "\nvariant=" + variant;
+  } else {
+      // Human Seek Mode
+      int plusPos = board_gameMode.indexOf('+');
+      if (plusPos != -1) {
+          initialStr = board_gameMode.substring(0, plusPos);
+          incrementStr = board_gameMode.substring(plusPos + 1);
+      } else {
+          DEBUG_SERIAL.println("Invalid time control format.");
+          return;
+      }
+      
+      endpoint = "/api/board/seek";
+      plainTextBody = "rated=" + rated_str + 
+                      "\ntime=" + initialStr + 
+                      "\nincrement=" + incrementStr + 
+                      "\ndays=" + days_str +  
+                      "\nvariant=" + variant + 
+                      "\nratingRange=" + ratingRange;
   }
-
-  // Send the POST request with Content-Type: text/plain
-  client.println("POST /api/board/seek HTTP/1.1");
+  
+  // Ensure client is connected
+  if (!client.connected()) {
+      client.connect("lichess.org", 443);
+  }
+  
+  // Send the POST request
+  client.println("POST " + endpoint + " HTTP/1.1");
   client.println("Host: lichess.org");
   client.print("Authorization: Bearer ");
-  client.println(lichess_api_token);  // Replace with your API token
-  client.println("Content-Type: text/plain");  // Use text/plain
+  client.println(lichess_api_token);
+  client.println("Content-Type: text/plain");
   client.print("Content-Length: ");
   client.println(plainTextBody.length());
   client.println("Connection: keep-alive");
-  client.println();  // Blank line between headers and body
-  // Send the plain text body
+  client.println(); // Blank line between headers and body
   client.println(plainTextBody);
-
+  
   // Wait for response (optional)
   delay(100);
   char* char_response = catchResponseFromClient(client);
   DEBUG_SERIAL.println(char_response);
-  //client.stop();
+  
   is_seeking = true;
 }

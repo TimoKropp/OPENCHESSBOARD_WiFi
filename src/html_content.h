@@ -115,6 +115,14 @@ const char htmlContent[] PROGMEM = R"rawliteral(
           <option value="10+5">10+5</option>
           <option value="15+10">15+10</option>
           <option value="30+20">30+20</option>
+          <option value="AI level 1">AI level 1</option>
+          <option value="AI level 2">AI level 2</option>
+          <option value="AI level 3">AI level 3</option>
+          <option value="AI level 4">AI level 4</option>
+          <option value="AI level 5">AI level 5</option>
+          <option value="AI level 6">AI level 6</option>
+          <option value="AI level 7">AI level 7</option>
+          <option value="AI level 8">AI level 8</option>
         </select>
       </div>
 
