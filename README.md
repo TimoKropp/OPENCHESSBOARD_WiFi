@@ -19,6 +19,17 @@ You can checkout this video to see how it works:
 
 <img src="data/demo.png" alt="access point" width="300"/>
 
+# Mode Selection
+If you dont use the mode selection, the board starts with the default start-up method selected via configured via the access point. You can select and overwrite the default procedure by placing all peaces in the starting positon and remove one piece to select the mode.
+<img src="data/game_modes.png" alt="game mode" width="300"/><br>
+The image shows the example for selecting game mode A.
+You can choose between the following modes:  <br>
+  - **A:** Start the board in stand-alone mode with WiFi connectivity <br>
+  - **B:** Start the board in App mode with BLE connectivity to the Blichess App.   <br>
+  - **C:**  Start the board in configuration mode which starts hosting a WiFi accesspoint: connect to the "OCB" WiFi and connect to http://openchessboard.local in your browser.
+  
+
+
 # Requirements
 This project runs on Arduino Nano esp32 with the OPENCHESSBOARD hardware.
 
