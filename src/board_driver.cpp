@@ -18,7 +18,7 @@ int HALL_ROW_S2 = A5;  //A5/D19
 
 int HALL_SENSE = A3;  //A3
 
-#define SENSE_THRS 600
+#define SENSE_THRS 1000
 
 /* ---------------------------------------
  *  Function to initiate GPIOs.
@@ -112,7 +112,7 @@ void readHall(byte read_hall_array[]) {
     digitalWrite(HALL_ROW_S0, bit0);
     digitalWrite(HALL_ROW_S1, bit1);
     digitalWrite(HALL_ROW_S2, bit2);
-    delayMicroseconds(500);
+
     for (int col_index = 0; col_index < 8; col_index++) {
 
         bool bit0 = ((byte)col_index & (1 << 0)) != 0;
@@ -122,9 +122,8 @@ void readHall(byte read_hall_array[]) {
         digitalWrite(HALL_OUT_S1, bit1);
         digitalWrite(HALL_OUT_S2, bit2);
         
-      delayMicroseconds(300);
+      delay(1);
       hall_val = analogRead(HALL_SENSE);
-      delayMicroseconds(300);
  
       if (hall_val < SENSE_THRS) {
         read_hall_array[row_index] |= 1UL << (col_index);
@@ -135,6 +134,24 @@ void readHall(byte read_hall_array[]) {
 
 }
 
+void rotate90CounterClockwise(uint8_t hallBoardState[8]) {
+  uint8_t rotated[8] = {0};  // New rotated board
+
+  for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+          // Extract the bit from (row, col)
+          uint8_t bit = (hallBoardState[row] >> col) & 1;
+
+          // Place it at the rotated position
+          rotated[7 - col] |= (bit << row);
+      }
+  }
+
+  // Copy back the rotated result
+  for (int i = 0; i < 8; i++) {
+    hallBoardState[i] = rotated[i];
+  }
+}
 
 /* ---------------------------------------
  *  Function that waits for a move input.
@@ -292,6 +309,8 @@ inline String getPiecesPlacement(const byte hallBoardState[]) {
 String getFen(void) {
   byte hallBoardState[8];
   readHall(hallBoardState);
+  rotate90CounterClockwise(hallBoardState);
+
   return getPiecesPlacement(hallBoardState);
 }
 

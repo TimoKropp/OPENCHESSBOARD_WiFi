@@ -143,9 +143,9 @@ void readBoardSelection(){
   byte pattern3[8];
   byte pattern4[8];
 
-  memset(pattern1, 0x00, sizeof(pattern1));
-  memset(pattern2, 0x00, sizeof(pattern2));
-  memset(pattern3, 0x00, sizeof(pattern3));
+  memset(pattern1, 0xC3, sizeof(pattern1));
+  memset(pattern2, 0xC3, sizeof(pattern2));
+  memset(pattern3, 0xC3, sizeof(pattern3));
   memset(pattern4, 0x00, sizeof(pattern4));
 
   pattern1[7] =0xC2; // remove piece on a1 to select this
