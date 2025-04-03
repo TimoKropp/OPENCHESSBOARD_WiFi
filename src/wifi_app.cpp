@@ -17,14 +17,13 @@ String wifi_password;
 int status = WL_IDLE_STATUS;
 WiFiClientSecure StreamClient;
 WiFiClientSecure PostClient;
-Ticker timer;
 
 //lichess variables
 String lichess_api_token;
 char server[] = "lichess.org"; 
 String username = "no";
-String currentGameID = "no";
-bool myturn = true;
+String currentGameID = "noGame";
+bool myturn = false;
 String lastMove = "no";
 String myMove = "no";
 String moves = "no";
@@ -47,38 +46,41 @@ void run_WiFi_app(void){
     
     if (StreamClient.connect(server, 443))
     {
-        if (board_gameMode != "None"  && !is_seeking){
+      DEBUG_SERIAL.println("Find ongoing game");
+       
+      getGameID(StreamClient); // checks whos turn it is
 
-          DEBUG_SERIAL.println("\nWait for Starting Position");   
-          while(!isStartingPosition()){
-            delay(100);
-          }
 
-          DEBUG_SERIAL.println("\nStart Game with prefered settings: "+ board_gameMode);   
-          postNewGame(PostClient,  board_gameMode);
-
+      //Start new game if no game is running and seek not already started
+      if (board_gameMode != "None"  && !is_seeking &&  !is_game_running){
+        DEBUG_SERIAL.println("\nWait for Starting Position");   
+        while(!isStartingPosition()){
+          delay(100);
         }
-        DEBUG_SERIAL.println("Find ongoing game");
-        
-        getGameID(StreamClient); // checks whos turn it is
+        DEBUG_SERIAL.println("\nStart Game with prefered settings: "+ board_gameMode);   
+        postNewGame(PostClient,  board_gameMode);
+      }
 
-        if (currentGameID != "no")
-        {
+      // if a game is found, wait for moves
+      if (is_game_running)
+      {
+        getStream(StreamClient);
         DEBUG_SERIAL.println("Start move stream from game");
-        getStream(StreamClient);    
-        
-        delay(500);// make sure first move is catched by isr
-        
         setStatePlaying();
-            
+
         while (is_game_running)
         {   
+            if (timerFlag) {
+                timerHandler();      // Call handler function safely
+                timerFlag = false;
+            }
+
             if (myturn && is_game_running)
-            { 
+            {
             String accept_move = "no";  
             
             //print last move if move was detected
-            if (lastMove.length() > 3){
+            if (lastMove.length() == 4){
                 DEBUG_SERIAL.print("opponents move: ");
                 DEBUG_SERIAL.println(lastMove);
 
@@ -98,12 +100,11 @@ void run_WiFi_app(void){
 
             // blocking, waits for move input
             postMove(PostClient);
-            
             }
         }
-        }
-        DEBUG_SERIAL.print("reset game...");  
-        disableClient(StreamClient);
-    }
+      }
+      DEBUG_SERIAL.print("reset game...");  
+      disableClient(StreamClient);
+  }
   }
 }

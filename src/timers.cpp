@@ -1,17 +1,17 @@
 
 #include "openchessboard.h"
 
-/* ---------------------------------------
-    interupt handler function. Changes LED states for booting and connection sequence.
-    When game is running, this function periodically checks for the game status from
-    the stream of the StreamClient.
-    @params[in] void
-    @return void
-*/
+hw_timer_t *timer = NULL;
+volatile bool timerFlag = false;
+String game_status;
 
-void timerCallback(void)
-{
-
+// Interrupt Service Routine (ISR)
+void IRAM_ATTR onTimer() {
+  timerFlag = true;  // Set flag to indicate interrupt
+}
+              
+void timerHandler() {
+  DEBUG_SERIAL.println(".");
   if (is_booting)
   {
     displayBootWait();
@@ -23,14 +23,14 @@ void timerCallback(void)
     displayConnectWait();
     connect_flipstate = !connect_flipstate;
   }
-
+  
   if (is_game_running && !is_booting && !is_connecting)
-  {
+  { 
     
     char* char_response = catchResponseFromClient(StreamClient);
 
-    String moves = parseValueFromResponse(char_response, "moves");
-    String game_status = parseValueFromResponse(char_response, "status");
+    moves = parseValueFromResponse(char_response, "moves");
+    game_status = parseValueFromResponse(char_response, "status");
 
     // Detect Game restart
     if (game_status != "started" && game_status != "no")
@@ -55,8 +55,7 @@ void timerCallback(void)
       myturn = true;
     }
   }
-}                   
-
+}
 
 
 /* ---------------------------------------
@@ -66,13 +65,16 @@ void timerCallback(void)
     @return void
 */
 void isr_setup(void) {
-  timer.attach(0.3, timerCallback);
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &onTimer, true);
+  timerAlarmWrite(timer, 300000, true);
+  timerAlarmEnable(timer);
 }
 
 void disableISR() {
-  timer.detach(); // This will stop the timer from calling the callback
+  timerAlarmDisable(timer);
 }
 
 void enableISR() {
-  timer.attach(0.3, timerCallback); // This will re-enable the timer callback
+  timerAlarmEnable(timer);
 }

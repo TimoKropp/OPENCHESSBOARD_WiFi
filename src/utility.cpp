@@ -48,12 +48,13 @@ void checkCastling(String move_input) {
 */
 void setStateBooting(void){
   is_game_running = false;
-  is_booting = false;
-  is_connecting = true;
-  lastMove = "xx";
+  is_booting = true;
+  is_connecting = false;
+  is_seeking = false;   
+  lastMove = "xy";
   myMove = "xx";
   moves = "no";
-  currentGameID = "no";
+  currentGameID = "noGame";
   myturn = false;
 }
 
@@ -66,10 +67,11 @@ void setStateConnecting(void){
   is_game_running = false;
   is_booting = false;
   is_connecting  = true;
-  lastMove = "xx";
+  is_seeking = false;   
+  lastMove = "xy";
   myMove = "xx";
   moves = "no";
-  currentGameID = "no";
+  currentGameID = "noGame";
   myturn = false;
 }
 
@@ -77,6 +79,7 @@ void setStatePlaying(void){
   is_seeking = false;    
   is_game_running = true;
   is_connecting = false;
+  displayNewGame();
 }
 
 String urlDecode(const String &encoded) {
@@ -128,6 +131,7 @@ bool isStartingPosition(void){
   byte read_hall_array[8];
   byte pattern1[8];
   memset(pattern1, 0xC3, sizeof(pattern1));
+  readHall(read_hall_array);
   if (memcmp(read_hall_array, pattern1, 8) == 0){
     return true;
   }

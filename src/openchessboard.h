@@ -9,7 +9,6 @@
 #include "wifi_client.h"
 #include "lichess_client.h"
 #include "board_driver.h"
-#include <Ticker.h>
 #include "settings_accesspoint.h"
 #include <Preferences.h>
 #include "ble_app.h"
@@ -31,7 +30,8 @@ extern char server[];
 extern WiFiClientSecure StreamClient;
 extern WiFiClientSecure PostClient;
 
-extern Ticker timer;
+extern hw_timer_t *timer;
+extern volatile bool timerFlag;
 
 //lichess variables
 extern String username;

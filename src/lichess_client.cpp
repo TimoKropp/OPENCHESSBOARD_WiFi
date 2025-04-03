@@ -6,19 +6,19 @@
  *  @return void
 */
 void postMove(WiFiClientSecure  &client) {
+
   while (myturn && is_game_running)
           {
             clearDisplay();
+            DEBUG_SERIAL.print("wait for move input...");
+            
             String move_input = getMoveInput();
             clearDisplay();
             DEBUG_SERIAL.print("my move: ");
             DEBUG_SERIAL.println(move_input);
-          
+            disableISR();
             myMove = move_input;
             if(is_game_running){
-
-              disableISR();
-      
               if (!client.connected()) {
                   client.connect(server, 443);
               }
@@ -38,19 +38,18 @@ void postMove(WiFiClientSecure  &client) {
             client.println("\n");
             delay(100);
             char* char_response = catchResponseFromClient(client);
-            DEBUG_SERIAL.println(char_response);
+            //DEBUG_SERIAL.println(char_response);
             String moveSuccess = parseValueFromResponse(char_response, "ok");        
-            
             client.stop();
+            
             if (moveSuccess == "true") {
               DEBUG_SERIAL.println("move success!");
               myturn = false;
               client.connect(server, 443);
-              enableISR(); 
+              enableISR();
             }
             else
-            {   
-                enableISR();             
+            {        
                 DEBUG_SERIAL.println("wrong move!");       
                 displayMove(myMove);
                 String reverse_move =  (String)myMove.charAt(2) 
@@ -112,15 +111,24 @@ void getGameID(WiFiClientSecure  &client){
     client.println(lichess_api_token);
     client.println("Connection: keep-alive");
     client.println("\n"); 
-
+    delay(300);
     char* char_response = catchResponseFromClient(client);
-
+    //DEBUG_SERIAL.print(char_response);
     currentGameID = parseValueFromResponse(char_response, "gameId");
     DEBUG_SERIAL.print("current game id: ");
     DEBUG_SERIAL.println(currentGameID);
+
+    if (currentGameID.length() == 8){
+        is_seeking = false;
+        is_game_running = true;
+    }
     myturn = parseValueFromResponse(char_response, "isMyTurn");
     DEBUG_SERIAL.print("my turn: ");
     DEBUG_SERIAL.println(myturn);
+
+    lastMove = parseValueFromResponse(char_response, "lastMove");
+    DEBUG_SERIAL.print("last move: ");
+    DEBUG_SERIAL.println(lastMove);
 }
 
 char* catchResponseFromClient(WiFiClientSecure &client) {
@@ -188,66 +196,73 @@ String parseValueFromResponse(const char* response, const char* key) {
 }
 
 void postNewGame(WiFiClientSecure &client, String board_gameMode) {
-  String rated_str = "false";
-  String variant = "standard";
-  String ratingRange = "";    // Optional
-  String days_str = "";       // Default for correspondence games
-  String initialStr;
-  String incrementStr;
-  String plainTextBody;
-  String endpoint;
+    String rated_str = "false";
+    String variant = "standard";
+    String ratingRange = "";  // Optional
+    String days_str = "";     // Default for correspondence games
+    String initialStr;
+    String incrementStr;
+    String endpoint;
+    String requestBody;
+    
+    if (board_gameMode.startsWith("AI level ")) {
+        // AI Challenge Mode
+        int level = board_gameMode.substring(9).toInt();  // Extract and convert to integer
+        if (level < 1 || level > 8) {
+            DEBUG_SERIAL.println("Invalid AI level.");
+            return;
+        }
+        
+        endpoint = "/api/challenge/ai";  // API endpoint
+        requestBody = "level=" + String(level) + "&rated=" + rated_str + "&variant=" + variant; // Correct format
+
+        DEBUG_SERIAL.print("AI Challenge Endpoint: ");
+        DEBUG_SERIAL.println(endpoint);
+        DEBUG_SERIAL.print("Request Body: ");
+        DEBUG_SERIAL.println(requestBody);
+    } else {
+        // Human Seek Mode
+        int plusPos = board_gameMode.indexOf('+');
+        if (plusPos != -1) {
+            initialStr = board_gameMode.substring(0, plusPos);
+            incrementStr = board_gameMode.substring(plusPos + 1);
+        } else {
+            DEBUG_SERIAL.println("Invalid time control format.");
+            return;
+        }
+
+        endpoint = "/api/board/seek";  // Correct API endpoint
+        requestBody = "rated=" + rated_str + 
+                      "&time=" + initialStr + 
+                      "&increment=" + incrementStr + 
+                      "&days=" + days_str +  
+                      "&variant=" + variant + 
+                      "&ratingRange=" + ratingRange;
+        
+        DEBUG_SERIAL.print("Human Seek Endpoint: ");
+        DEBUG_SERIAL.println(endpoint);
+        DEBUG_SERIAL.print("Request Body: ");
+        DEBUG_SERIAL.println(requestBody);
+    }
   
-  if (board_gameMode.startsWith("AI level ")) {
-      // AI Challenge Mode
-      int level = board_gameMode.substring(9).toInt();
-      if (level < 1 || level > 8) {
-          DEBUG_SERIAL.println("Invalid AI level.");
-          return;
-      }
-      
-      endpoint = "/api/challenge/ai";
-      plainTextBody = "level=" + String(level) + "\nrated=" + rated_str + "\nvariant=" + variant;
-  } else {
-      // Human Seek Mode
-      int plusPos = board_gameMode.indexOf('+');
-      if (plusPos != -1) {
-          initialStr = board_gameMode.substring(0, plusPos);
-          incrementStr = board_gameMode.substring(plusPos + 1);
-      } else {
-          DEBUG_SERIAL.println("Invalid time control format.");
-          return;
-      }
-      
-      endpoint = "/api/board/seek";
-      plainTextBody = "rated=" + rated_str + 
-                      "\ntime=" + initialStr + 
-                      "\nincrement=" + incrementStr + 
-                      "\ndays=" + days_str +  
-                      "\nvariant=" + variant + 
-                      "\nratingRange=" + ratingRange;
-  }
-  
-  // Ensure client is connected
-  if (!client.connected()) {
-      client.connect("lichess.org", 443);
-  }
-  
-  // Send the POST request
-  client.println("POST " + endpoint + " HTTP/1.1");
-  client.println("Host: lichess.org");
-  client.print("Authorization: Bearer ");
-  client.println(lichess_api_token);
-  client.println("Content-Type: text/plain");
-  client.print("Content-Length: ");
-  client.println(plainTextBody.length());
-  client.println("Connection: keep-alive");
-  client.println(); // Blank line between headers and body
-  client.println(plainTextBody);
-  
-  // Wait for response (optional)
-  delay(100);
-  char* char_response = catchResponseFromClient(client);
-  DEBUG_SERIAL.println(char_response);
-  
-  is_seeking = true;
+    // Ensure client is connected
+    if (!client.connected()) {
+        client.connect("lichess.org", 443);
+    }
+    
+    // Send the POST request
+    client.print("POST " + endpoint + " HTTP/1.1\r\n");
+    client.println("Host: lichess.org");
+    client.print("Authorization: Bearer ");
+    client.println(lichess_api_token);
+    client.println("Content-Type: application/x-www-form-urlencoded");  // Required for form data
+    client.print("Content-Length: ");
+    client.println(requestBody.length());  // Ensure correct content length
+    client.println("Connection: close\r\n");  // Blank line before body
+    client.println(requestBody);  // Send body
+    
+    delay(300);
+    char* char_response = catchResponseFromClient(client);
+    DEBUG_SERIAL.println(char_response);
+
 }
