@@ -85,7 +85,7 @@ bool isNewVersionAvailable(String latest_version) {
     preferences.end();
     DEBUG_SERIAL.printf("Current Version: %s, Latest Version: %s\n", current_version.c_str(), latest_version.c_str());
 
-  return (latest_version > current_version); 
+  return (latest_version != current_version); 
 }
 
 
