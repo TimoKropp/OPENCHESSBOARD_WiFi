@@ -31,8 +31,8 @@ bool is_castling_allowed = true;
 
 
 void run_WiFi_app(void){
-  setStateConnecting();
 
+  setStateConnecting();
   wifi_setup();
   wifi_firmwareUpdate();
 

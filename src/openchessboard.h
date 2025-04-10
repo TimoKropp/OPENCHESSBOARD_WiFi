@@ -15,12 +15,13 @@
 #include "wifi_app.h"
 #include "puzzle_app.h"
 #include <Update.h>
+#include <esp_ota_ops.h>
 #include <ESPmDNS.h>
 
 // Debug Settings
 //#define MANUAL_MOVE_INPUT
 //#define PLUG_AT_TOP // not fully supported yet
-#define DEBUG false  
+#define DEBUG true  
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 // WiFi variables

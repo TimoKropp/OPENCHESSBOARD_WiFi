@@ -279,3 +279,41 @@ void wifi_firmwareUpdate() {
 
 
 }
+
+void validateFirmware() {
+    const esp_partition_t* running = esp_ota_get_running_partition();
+    DEBUG_SERIAL.printf("Running partition: %s\n", running->label);
+
+    esp_ota_img_states_t ota_state;
+    esp_err_t result = esp_ota_get_state_partition(running, &ota_state);
+
+    if (result == ESP_OK) {
+        DEBUG_SERIAL.printf("OTA state: %d\n", ota_state);
+
+        if (ota_state == ESP_OTA_IMG_PENDING_VERIFY) {
+            DEBUG_SERIAL.println("Firmware pending verify...");
+
+            // Do some checks — optional: WiFi, sensors, etc.
+
+            // If all checks pass:
+            esp_err_t valid_result = esp_ota_mark_app_valid_cancel_rollback();
+            if (valid_result == ESP_OK) {
+                DEBUG_SERIAL.println("Firmware marked as valid!");
+            } else {
+                DEBUG_SERIAL.printf("Failed to mark firmware valid: %s\n", esp_err_to_name(valid_result));
+            }
+
+        } else if (ota_state == ESP_OTA_IMG_VALID) {
+            DEBUG_SERIAL.println("Firmware already valid.");
+        } else if (ota_state == ESP_OTA_IMG_INVALID) {
+            DEBUG_SERIAL.println("Firmware marked as invalid.");
+        } else if (ota_state == ESP_OTA_IMG_ABORTED) {
+            DEBUG_SERIAL.println("Firmware update was aborted.");
+        } else {
+            DEBUG_SERIAL.printf("Unknown OTA state: %d\n", ota_state);
+        }
+
+    } else {
+        DEBUG_SERIAL.printf("Failed to get OTA state: %s\n", esp_err_to_name(result));
+    }
+}

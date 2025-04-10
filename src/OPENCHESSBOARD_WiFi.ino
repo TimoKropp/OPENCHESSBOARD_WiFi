@@ -11,13 +11,17 @@ void setup() {
 
 
   initHW();
+
+
   isr_setup();
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
   DEBUG_SERIAL.begin(115200);
   delay(3000);
 #endif
-  
+
+validateFirmware(); // runs wifi as check
+
 readSettings();
 readBoardSelection();
 
