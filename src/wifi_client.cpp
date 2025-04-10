@@ -219,7 +219,7 @@ bool downloadFirmware(String latest_version) {
                         totalWritten += written;
                         currentByte += written;
                         DEBUG_SERIAL.printf("Written %d/%d bytes\n", totalWritten, contentLength);
-                        setStateUpdating();
+
                     } else {
                         DEBUG_SERIAL.println("No data available from client. Retrying...");
                         break;
@@ -262,6 +262,7 @@ void wifi_firmwareUpdate() {
       }
       else{
         DEBUG_SERIAL.println("Download firmware:" + latest_version);
+        setStateUpdating();
         if (!downloadFirmware(latest_version)) {
             DEBUG_SERIAL.println("Firmware update failed");
             return;
