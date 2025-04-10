@@ -21,7 +21,7 @@
 // Debug Settings
 //#define MANUAL_MOVE_INPUT
 //#define PLUG_AT_TOP // not fully supported yet
-#define DEBUG true  
+#define DEBUG false  
 #define DEBUG_SERIAL if(DEBUG)Serial
 
 // WiFi variables
