@@ -134,8 +134,14 @@ void getGameID(WiFiClientSecure  &client){
 char* catchResponseFromClient(WiFiClientSecure &client) {
     static char char_response[2024] = {0}; 
 
+    unsigned long startTime = millis();
+
     while (!client.available()) {
-        delay(1);
+        if (millis() - startTime > 800) {
+            char_response[0] = '\0'; 
+            return char_response;
+        }
+        delay(1); 
     }
 
     size_t length = 0;
@@ -218,8 +224,8 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
 
         DEBUG_SERIAL.print("AI Challenge Endpoint: ");
         DEBUG_SERIAL.println(endpoint);
-        DEBUG_SERIAL.print("Request Body: ");
-        DEBUG_SERIAL.println(requestBody);
+        //DEBUG_SERIAL.print("Request Body: ");
+        //DEBUG_SERIAL.println(requestBody);
     } else {
         // Human Seek Mode
         int plusPos = board_gameMode.indexOf('+');
@@ -241,8 +247,8 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
         
         DEBUG_SERIAL.print("Human Seek Endpoint: ");
         DEBUG_SERIAL.println(endpoint);
-        DEBUG_SERIAL.print("Request Body: ");
-        DEBUG_SERIAL.println(requestBody);
+       //DEBUG_SERIAL.print("Request Body: ");
+        //DEBUG_SERIAL.println(requestBody);
     }
   
     // Ensure client is connected
@@ -263,6 +269,6 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
     
     delay(300);
     char* char_response = catchResponseFromClient(client);
-    DEBUG_SERIAL.println(char_response);
+    //DEBUG_SERIAL.println(char_response);
 
 }

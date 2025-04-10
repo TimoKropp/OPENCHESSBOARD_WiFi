@@ -6,6 +6,7 @@ extern void clearDisplay(void);
 extern void displayMove(String mv);
 extern void displayBootWait(void);
 extern void displayConnectWait(void);
+extern void displayUpdateWait(void);
 extern void displayArray(void);
 extern void readHall(byte read_hall_array[]);
 extern void displayFrame(byte frame[8]);

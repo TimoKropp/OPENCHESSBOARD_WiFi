@@ -3,9 +3,9 @@
 
 
 // LED and state variables
-bool boot_flipstate = true;
+bool update_flipstate = true;
 bool is_booting = true;
-bool connect_flipstate = false;
+
 bool is_connecting = false;
 bool is_game_running = false;
 bool is_seeking = false;
@@ -31,14 +31,13 @@ bool is_castling_allowed = true;
 
 
 void run_WiFi_app(void){
- 
+  
   wifi_setup();
-
   wifi_firmwareUpdate();
   PostClient.setInsecure();
   StreamClient.setInsecure();
   DEBUG_SERIAL.println("\nStarting connection to server...");
-
+  
   while (1){
     setStateConnecting();
 
@@ -70,10 +69,7 @@ void run_WiFi_app(void){
 
         while (is_game_running)
         {   
-            if (timerFlag) {
-                timerHandler();      // Call handler function safely
-                timerFlag = false;
-            }
+            moveStreamHandler();
 
             if (myturn && is_game_running)
             {
@@ -90,9 +86,10 @@ void run_WiFi_app(void){
                 while(accept_move != lastMove && is_game_running){
                 displayMove(lastMove);
                 accept_move = getMoveInput();
-
                 // if king move is a castling move, wait for rook move
                 checkCastling(accept_move);
+                clearDisplay();
+                moveStreamHandler();
                 }
     
                 DEBUG_SERIAL.println("move accepted!");

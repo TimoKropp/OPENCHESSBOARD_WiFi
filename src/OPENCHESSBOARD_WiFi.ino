@@ -12,12 +12,11 @@ void setup() {
 
   initHW();
   setStateBooting();
-
+  displayBootWait();
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
   DEBUG_SERIAL.begin(115200);
-  delay(1000);
-  while (!Serial);
+  delay(3000);
 #endif
   
 readSettings();

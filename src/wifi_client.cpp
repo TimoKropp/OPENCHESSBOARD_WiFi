@@ -14,8 +14,9 @@ void wifi_setup(void){
 
   DEBUG_SERIAL.print("Connecting to Wifi");
   while (WiFi.status() != WL_CONNECTED) {
-      delay(100);
+      delay(300);
       DEBUG_SERIAL.print(".");
+      displayConnectWait();
   }
   DEBUG_SERIAL.println("");
   
@@ -202,7 +203,7 @@ bool downloadFirmware(String latest_version) {
                     unsigned long timeout = millis();
                     while (client.available() == 0) {
                         if (millis() - timeout > 5000) {
-                            Serial.println("Timeout waiting for response body");
+                            DEBUG_SERIAL.println("Timeout waiting for response body");
                             client.stop();
                             break;
                         }
@@ -218,6 +219,7 @@ bool downloadFirmware(String latest_version) {
                         totalWritten += written;
                         currentByte += written;
                         DEBUG_SERIAL.printf("Written %d/%d bytes\n", totalWritten, contentLength);
+                        displayUpdateWait();
                     } else {
                         DEBUG_SERIAL.println("No data available from client. Retrying...");
                         break;
@@ -259,7 +261,7 @@ void wifi_firmwareUpdate() {
           return;
       }
       else{
-        Serial.println("Download firmware:" + latest_version);
+        DEBUG_SERIAL.println("Download firmware:" + latest_version);
         if (!downloadFirmware(latest_version)) {
             DEBUG_SERIAL.println("Firmware update failed");
             return;

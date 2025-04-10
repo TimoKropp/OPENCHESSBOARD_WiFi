@@ -354,7 +354,7 @@ void clearDisplay(void) {
 
 
 /* ---------------------------------------
- *  Function that displays connection animation.
+ *  Function that displays vection animation.
  *  Writes to specific shift registers and flips states periodically by isr.
  *  @params[in] void
  *  @return void
@@ -362,14 +362,12 @@ void clearDisplay(void) {
 void displayConnectWait(void) {
   byte connect_led_array[8] = {0};
 
-  if (connect_flipstate) {
-    connect_led_array[3] = 0x10;
-    connect_led_array[4] = 0x08;
+
+  if (update_flipstate) {
+    connect_led_array[1] = 0x10;
   }
-  else {
-    connect_led_array[4] = 0x10;
-    connect_led_array[3] = 0x08;
-  }
+  update_flipstate ^= true;
+
   digitalWrite(LED_OE_N_PIN , 1);
   digitalWrite(LED_MR_N_PIN, 0);
   digitalWrite(LED_MR_N_PIN, 1);
@@ -441,13 +439,8 @@ void setDisplayMove(byte led_data_array[], String move_string) {
 void displayBootWait(void) {
   byte boot_led_array[8] = {0};
 
-  if (boot_flipstate) {
-    #ifdef PLUG_AT_TOP
-    boot_led_array[3] = 0x01;
-    #else
-    boot_led_array[0] = 0x10;
-    #endif
-  }
+  boot_led_array[0] = 0x10;
+
 
   digitalWrite(LED_OE_N_PIN , 1);
   digitalWrite(LED_MR_N_PIN, 0);
@@ -462,10 +455,30 @@ void displayBootWait(void) {
   else{
     digitalWrite(LED_OE_N_PIN , 0);
   }
-
-  delay(100);
 }
 
+void displayUpdateWait(void) {
+  byte update_led_array[8] = {0};
+
+  if (update_flipstate) {
+    update_led_array[0] = 0x01;
+  }
+  update_flipstate ^= true;
+
+  digitalWrite(LED_OE_N_PIN , 1);
+  digitalWrite(LED_MR_N_PIN, 0);
+  digitalWrite(LED_MR_N_PIN, 1);
+  digitalWrite(LED_LATCH_PIN, 0);
+  shiftOut(update_led_array);
+  DEBUG_SERIAL.println();
+  digitalWrite(LED_LATCH_PIN, 1);  
+  if (dimLEDs){
+  analogWrite(LED_OE_N_PIN , 150);
+  }
+  else{
+    digitalWrite(LED_OE_N_PIN , 0);
+  }
+}
 
 /* ---------------------------------------
  *  Function that displays move.

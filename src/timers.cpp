@@ -12,25 +12,13 @@ void IRAM_ATTR onTimer() {
               
 void timerHandler() {
   DEBUG_SERIAL.println(".");
-  if (is_booting)
-  {
-    displayBootWait();
-    boot_flipstate = !boot_flipstate;
-  }
-
-  if (is_connecting)
-  { 
-    displayConnectWait();
-    connect_flipstate = !connect_flipstate;
-  }
-  
   if (is_game_running && !is_booting && !is_connecting)
   { 
     
     char* char_response = catchResponseFromClient(StreamClient);
 
-    moves = parseValueFromResponse(char_response, "moves");
-    game_status = parseValueFromResponse(char_response, "status");
+    String moves = parseValueFromResponse(char_response, "moves");
+    String game_status = parseValueFromResponse(char_response, "status");
 
     // Detect Game restart
     if (game_status != "started" && game_status != "no")
@@ -77,4 +65,10 @@ void disableISR() {
 
 void enableISR() {
   timerAlarmEnable(timer);
+}
+void moveStreamHandler() {
+  if (timerFlag) {
+    timerHandler();      
+    timerFlag = false;
+  }
 }
