@@ -263,6 +263,8 @@ void wifi_firmwareUpdate() {
       else{
         DEBUG_SERIAL.println("Download firmware:" + latest_version);
         setStateUpdating();
+        update_flipstate = true;
+        displayUpdateWait();
         if (!downloadFirmware(latest_version)) {
             DEBUG_SERIAL.println("Firmware update failed");
             return;
