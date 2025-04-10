@@ -137,7 +137,7 @@ void readSettings(void){
     DEBUG_SERIAL.println("Game Mode: " + board_gameMode);
     DEBUG_SERIAL.println("Startup Type: " + board_startupType);
   } else {
-    Serial.println("No settings found, using default values.");
+    DEBUG_SERIAL.println("No settings found, using default values.");
   }
   preferences.end();
 }

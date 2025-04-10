@@ -372,7 +372,7 @@ void displayConnectWait(void) {
 
 
   if (update_flipstate) {
-    connect_led_array[1] = 0x10;
+    connect_led_array[0] = 0x10;
   }
   update_flipstate ^= true;
 
@@ -471,7 +471,7 @@ void displayUpdateWait(void) {
   byte update_led_array[8] = {0};
 
   if (update_flipstate) {
-    update_led_array[0] = 0x01;
+    update_led_array[0] = 0x80;
   }
   update_flipstate ^= true;
 
