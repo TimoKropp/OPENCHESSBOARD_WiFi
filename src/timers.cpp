@@ -10,8 +10,12 @@ void IRAM_ATTR onTimer() {
   timerFlag = true;  // Set flag to indicate interrupt
 }
               
-void timerHandler() {
+void gameTimerHandler() {
   DEBUG_SERIAL.println(".");
+  if (!StreamClient.available()){
+    return;
+  }
+
   if (is_game_running && !is_booting && !is_connecting)
   { 
     
@@ -59,16 +63,16 @@ void isr_setup(void) {
   timerAlarmEnable(timer);
 }
 
-void disableISR() {
+void disableGameTimer() {
   timerAlarmDisable(timer);
 }
 
-void enableISR() {
+void enableGameTimer() {
   timerAlarmEnable(timer);
 }
 void moveStreamHandler() {
   if (timerFlag) {
-    timerHandler();      
+    gameTimerHandler();      
     timerFlag = false;
   }
 }

@@ -219,7 +219,7 @@ bool downloadFirmware(String latest_version) {
                         totalWritten += written;
                         currentByte += written;
                         DEBUG_SERIAL.printf("Written %d/%d bytes\n", totalWritten, contentLength);
-                        displayUpdateWait();
+                        setStateUpdating();
                     } else {
                         DEBUG_SERIAL.println("No data available from client. Retrying...");
                         break;

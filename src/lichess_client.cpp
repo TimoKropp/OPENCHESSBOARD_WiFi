@@ -16,7 +16,7 @@ void postMove(WiFiClientSecure  &client) {
             clearDisplay();
             DEBUG_SERIAL.print("my move: ");
             DEBUG_SERIAL.println(move_input);
-            disableISR();
+            disableGameTimer();
             myMove = move_input;
             if(is_game_running){
               if (!client.connected()) {
@@ -46,11 +46,12 @@ void postMove(WiFiClientSecure  &client) {
               DEBUG_SERIAL.println("move success!");
               myturn = false;
               client.connect(server, 443);
-              enableISR();
+              enableGameTimer();
             }
             else
             {        
-                DEBUG_SERIAL.println("wrong move!");       
+                DEBUG_SERIAL.println("wrong move!"); 
+                enableGameTimer();      
                 displayMove(myMove);
                 String reverse_move =  (String)myMove.charAt(2) 
                 +  (String)myMove.charAt(3)
@@ -75,6 +76,9 @@ void postMove(WiFiClientSecure  &client) {
  *  @return void
 */  
 void getStream(WiFiClientSecure  &client){
+    if (!client.connected()) {
+        client.connect(server, 443);
+    }
     client.print("GET /api/board/game/stream/");
     client.print((String)currentGameID);
     client.println(" HTTP/1.1");
@@ -83,6 +87,7 @@ void getStream(WiFiClientSecure  &client){
     client.println(lichess_api_token);
     client.println("Connection: keep-alive");
     client.println("\n");
+    client.flush();
   } 
 
 void disableClient(WiFiClientSecure  &client){
@@ -105,30 +110,35 @@ void disableClient(WiFiClientSecure  &client){
 */       
 void getGameID(WiFiClientSecure  &client){
     // Request setup
+    if (!client.connected()) {
+        client.connect(server, 443);
+    }
     client.println("GET /api/account/playing HTTP/1.1");
     client.println("Host: lichess.org");
     client.print("Authorization: Bearer ");
     client.println(lichess_api_token);
     client.println("Connection: keep-alive");
     client.println("\n"); 
-    delay(300);
+
     char* char_response = catchResponseFromClient(client);
     //DEBUG_SERIAL.print(char_response);
     currentGameID = parseValueFromResponse(char_response, "gameId");
-    DEBUG_SERIAL.print("current game id: ");
-    DEBUG_SERIAL.println(currentGameID);
 
     if (currentGameID.length() == 8){
-        is_seeking = false;
-        is_game_running = true;
-    }
-    myturn = parseValueFromResponse(char_response, "isMyTurn");
-    DEBUG_SERIAL.print("my turn: ");
-    DEBUG_SERIAL.println(myturn);
+        DEBUG_SERIAL.print("current game id: ");
+        DEBUG_SERIAL.println(currentGameID);
+        setStatePlaying();
+    
+        myturn = parseValueFromResponse(char_response, "isMyTurn");
+        DEBUG_SERIAL.print("my turn: ");
+        DEBUG_SERIAL.println(myturn);
 
-    lastMove = parseValueFromResponse(char_response, "lastMove");
-    DEBUG_SERIAL.print("last move: ");
-    DEBUG_SERIAL.println(lastMove);
+        lastMove = parseValueFromResponse(char_response, "lastMove");
+        DEBUG_SERIAL.print("last move: ");
+        DEBUG_SERIAL.println(lastMove);
+        disableClient(client);
+    }
+    delay(300);
 }
 
 char* catchResponseFromClient(WiFiClientSecure &client) {
@@ -163,7 +173,7 @@ String parseValueFromResponse(const char* response, const char* key) {
 
     int jsonStart = strResponse.indexOf('{');
     if (jsonStart == -1) {
-        DEBUG_SERIAL.println("JSON start not found.");
+        //DEBUG_SERIAL.println("JSON start not found.");
         return "no"; // Return NULL if no JSON object is found
     }
     strResponse = strResponse.substring(jsonStart); 
@@ -269,6 +279,6 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
     
     delay(300);
     char* char_response = catchResponseFromClient(client);
+    is_seeking = true;
     //DEBUG_SERIAL.println(char_response);
-
 }

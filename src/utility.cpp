@@ -50,6 +50,7 @@ void setStateBooting(void){
   is_game_running = false;
   is_booting = true;
   is_connecting = false;
+  is_updating = false;
   is_seeking = false;   
   lastMove = "xy";
   myMove = "xx";
@@ -58,6 +59,18 @@ void setStateBooting(void){
   myturn = false;
 }
 
+void setStateUpdating(void){
+  is_game_running = false;
+  is_booting = false;
+  is_connecting = false;
+  is_updating = true;
+  is_seeking = false;   
+  lastMove = "xy";
+  myMove = "xx";
+  moves = "no";
+  currentGameID = "noGame";
+  myturn = false;
+}
 /* ---------------------------------------
  *  function to set connecting state and initializes state variables
  *  @params[in] void
@@ -67,6 +80,7 @@ void setStateConnecting(void){
   is_game_running = false;
   is_booting = false;
   is_connecting  = true;
+  is_updating = false;
   is_seeking = false;   
   lastMove = "xy";
   myMove = "xx";
@@ -78,6 +92,7 @@ void setStateConnecting(void){
 void setStatePlaying(void){
   is_seeking = false;    
   is_game_running = true;
+  is_updating = false;
   is_connecting = false;
   displayNewGame();
 }
@@ -129,9 +144,16 @@ void readSettings(void){
 
 bool isStartingPosition(void){
   byte read_hall_array[8];
+  byte diff_pattern[8];
   byte pattern1[8];
   memset(pattern1, 0xC3, sizeof(pattern1));
   readHall(read_hall_array);
+
+  calculateDifference(diff_pattern, read_hall_array, pattern1);
+  rotate180(diff_pattern);
+  dimLEDs = true;
+  displayArray(diff_pattern);
+
   if (memcmp(read_hall_array, pattern1, 8) == 0){
     return true;
   }

@@ -7,9 +7,11 @@ extern void displayMove(String mv);
 extern void displayBootWait(void);
 extern void displayConnectWait(void);
 extern void displayUpdateWait(void);
-extern void displayArray(void);
+extern void displayArray(byte ledBoardState[]);
 extern void readHall(byte read_hall_array[]);
 extern void displayFrame(byte frame[8]);
+extern void rotate180(byte array[8]);
+extern void calculateDifference(byte result[], byte a[], byte b[]);
 
 extern void displayNewGame(void);
 extern void displayWaitForGame(void);

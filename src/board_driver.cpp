@@ -201,6 +201,7 @@ String getMoveInput(void) {
 
 // wait for Start move event
   while (!mvStarted && is_game_running) {
+
     readHall(hallBoardState1);
 
     for (int row_index = 0; row_index < 8; row_index++) {
@@ -220,6 +221,9 @@ String getMoveInput(void) {
         }
       }
     }
+    if (StreamClient.available()){
+      moveStreamHandler();
+    }
   }
 
   digitalWrite(LED_LATCH_PIN, 0);
@@ -229,6 +233,7 @@ String getMoveInput(void) {
 
 // wait for end move event
   while (!mvFinished  && is_game_running) {
+
     readHall(hallBoardState2);
     delay(100);
     readHall(hallBoardState3);
@@ -255,6 +260,9 @@ String getMoveInput(void) {
           }
         }
       }
+    }
+    if (StreamClient.available()){
+      moveStreamHandler();
     }
   }
   
@@ -439,8 +447,10 @@ void setDisplayMove(byte led_data_array[], String move_string) {
 void displayBootWait(void) {
   byte boot_led_array[8] = {0};
 
-  boot_led_array[0] = 0x10;
-
+  if (update_flipstate) {
+    boot_led_array[0] = 0x10;
+  }
+  update_flipstate ^= true;
 
   digitalWrite(LED_OE_N_PIN , 1);
   digitalWrite(LED_MR_N_PIN, 0);
@@ -504,6 +514,30 @@ void displayMove(String last_move) {
     digitalWrite(LED_OE_N_PIN , 0);
   }
 
+}
+
+void calculateDifference(byte result[], byte a[], byte b[]) {
+  for (int i = 0; i < 8; i++) {
+    result[i] = b[i] & ~a[i];
+  }
+}
+
+void rotate180(byte arr[8]) {
+  for (int i = 0; i < 4; i++) {
+    // Reverse the bits in the byte at arr[i] and arr[7-i] and swap them
+    byte temp = arr[i];
+    arr[i] = arr[7 - i];
+    arr[7 - i] = temp;
+
+    // Reverse the bits in each byte after swapping
+    arr[i] = (arr[i] & 0xF0) >> 4 | (arr[i] & 0x0F) << 4;
+    arr[i] = (arr[i] & 0xCC) >> 2 | (arr[i] & 0x33) << 2;
+    arr[i] = (arr[i] & 0xAA) >> 1 | (arr[i] & 0x55) << 1;
+
+    arr[7 - i] = (arr[7 - i] & 0xF0) >> 4 | (arr[7 - i] & 0x0F) << 4;
+    arr[7 - i] = (arr[7 - i] & 0xCC) >> 2 | (arr[7 - i] & 0x33) << 2;
+    arr[7 - i] = (arr[7 - i] & 0xAA) >> 1 | (arr[7 - i] & 0x55) << 1;
+  }
 }
 
 void displayArray(byte ledBoardState[]) {

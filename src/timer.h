@@ -1,7 +1,7 @@
 #pragma once
 
 extern void isr_setup(void);
-extern void disableISR(void);
-extern void enableISR(void);
-extern void timerHandler(void);
-extern void  moveStreamHandler(void);
+extern void disableGameTimer(void);
+extern void enableGameTimer(void);
+extern void gamTimerHandler(void);
+extern void moveStreamHandler(void);

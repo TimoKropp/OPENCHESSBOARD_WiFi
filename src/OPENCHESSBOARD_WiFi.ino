@@ -11,8 +11,7 @@ void setup() {
 
 
   initHW();
-  setStateBooting();
-  displayBootWait();
+  isr_setup();
 #if DEBUG == true
   //Initialize DEBUG_SERIAL and wait for port to open:
   DEBUG_SERIAL.begin(115200);
@@ -23,7 +22,6 @@ readSettings();
 readBoardSelection();
 
 if (board_startupType == "WiFi"){
-  isr_setup();
    DEBUG_SERIAL.println("\nRun WiFi App...");   
    run_WiFi_app();
 }
@@ -32,6 +30,7 @@ else if (board_startupType == "BLE"){
   run_BLE_app();
 }
 else if (board_startupType == "PUZZLE"){
+  disableGameTimer();
   DEBUG_SERIAL.println("\nRun queen puzzle App...");
   run_queen_puzzle();
 }
