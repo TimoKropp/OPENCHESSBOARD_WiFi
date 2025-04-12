@@ -5,23 +5,14 @@
  *  @params[in] WiFiClientSecure
  *  @return void
 */
-void postMove(WiFiClientSecure  &client) {
-            DEBUG_SERIAL.print("wait for move input...");
-            String move_input = getMoveInput();
-            clearDisplay();
-            DEBUG_SERIAL.print("my move: ");
-            DEBUG_SERIAL.println(move_input);
-            
-            myMove = move_input;
-
+void postMove(WiFiClientSecure  &client, String move) {
             if (!client.connected()) {
                 client.connect(server, 443);
             }
-
             client.print("POST /api/board/game/");
             client.print((String)currentGameID);
             client.print("/move/");
-            client.print(move_input);
+            client.print(move);
             client.println(" HTTP/1.1");
             client.println("Host: lichess.org");
             client.print("Authorization: Bearer ");
@@ -109,9 +100,15 @@ void getGameID(WiFiClientSecure  &client){
         DEBUG_SERIAL.print("last move: ");
         DEBUG_SERIAL.println(lastMove_temp);
 
-        if(lastMove_temp.length() == 4){
-            lastMove = lastMove_temp;
-            moves = lastMove;
+        if(lastMove_temp.length() == 4  & myturn){
+            oppLastMove = lastMove_temp;
+            latestMove = lastMove_temp;
+            moves = lastMove_temp;
+        }
+        if(lastMove_temp.length() == 4  & !myturn){
+            myLastMove = lastMove_temp;
+            latestMove = lastMove_temp;
+            moves = lastMove_temp;
         }
         setStatePlaying();
         client.flush();

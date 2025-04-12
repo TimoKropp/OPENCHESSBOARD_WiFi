@@ -280,7 +280,7 @@ String getMoveInput(void) {
 
   delay(300);
   #endif
-
+  clearDisplay();
   return mvInput;
 
 }

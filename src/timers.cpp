@@ -26,6 +26,7 @@ void gameTimerHandler() {
 
     JsonDocument doc;
     String moves_temp;
+    String latestMove_temp = "";
     String game_status = "";
 
     if (parseJsonResponse(char_response, doc)) {
@@ -41,12 +42,17 @@ void gameTimerHandler() {
       	if (moves_temp == "null" | moves_temp == "" ){
           return;
         }
+
         moves = moves_temp;
         DEBUG_SERIAL.println(moves);
-        lastMove = moves.substring(moves.length() - 4);
 
-        if (lastMove == myMove);{
-           myturn = true;
+        latestMove = moves.substring(moves.length() - 4);
+
+        if (latestMove == myLastMove){ 
+          myturn = false;
+        }
+        else{
+          myturn = true;
         }
 
         if (moves.length() > 3 & game_status != "started"){

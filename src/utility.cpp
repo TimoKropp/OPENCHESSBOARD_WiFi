@@ -25,8 +25,7 @@ void checkCastling(String move_input) {
    
    //wait until move was rook move from castling
    while(is_castling && is_game_running){
-    
-    displayMove(lastMove);
+    displayMove(myLastMove);
     move_input = getMoveInput();
     DEBUG_SERIAL.println(move_input);
     
@@ -52,7 +51,9 @@ void setStateBooting(void){
   is_connecting = false;
   is_updating = false;
   is_seeking = false;   
-  lastMove = "noLastMove";
+  myLastMove = "xx";
+  oppLastMove = "xy";
+  latestMove = "zz";
   myMove = "noMove";
   moves = "noMoves";
   currentGameID = "noGameID";
@@ -65,7 +66,9 @@ void setStateUpdating(void){
   is_connecting = false;
   is_updating = true;
   is_seeking = false;   
-  lastMove = "xx";
+  myLastMove = "xx";
+  oppLastMove = "xy";
+  latestMove = "zz";
   myMove = "yy";
   moves = "";
   currentGameID = "noGameID";
@@ -82,7 +85,9 @@ void setStateConnecting(void){
   is_connecting  = true;
   is_updating = false;
   is_seeking = false;   
-  lastMove = "xx";
+  myLastMove = "xx";
+  oppLastMove = "xy";
+  latestMove = "zz";
   myMove = "yy";
   moves = "";
   currentGameID = "noGameID";
