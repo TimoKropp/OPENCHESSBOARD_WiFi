@@ -24,9 +24,9 @@ char server[] = "lichess.org";
 String username = "no";
 String currentGameID = "noGame";
 bool myturn = false;
-String lastMove = "no";
-String myMove = "no";
-String moves = "no";
+String lastMove = "xx";
+String myMove = "yy";
+String moves = "";
 bool is_castling_allowed = true;
 
 
@@ -39,13 +39,14 @@ void run_WiFi_app(void){
   PostClient.setInsecure();
   StreamClient.setInsecure();
   DEBUG_SERIAL.println("\nStarting connection to server...");
-  
-  while (1){
+ 
+  while (WiFi.status() == WL_CONNECTED){
     DEBUG_SERIAL.println("\nConnected to Server...");
     DEBUG_SERIAL.println("Find ongoing game");
 
     while(!is_game_running){
-      getGameID(StreamClient);
+      getGameID(PostClient);
+      
       //Start new game if no game is running and seek not already started
       if (board_gameMode != "None"  && !is_seeking &&  !is_game_running){
         DEBUG_SERIAL.println("\nWait for Starting Position");   
@@ -53,43 +54,53 @@ void run_WiFi_app(void){
           delay(100);
         }
         
-        DEBUG_SERIAL.println("\nStart Game with prefered settings: "+ board_gameMode);   
+        DEBUG_SERIAL.println("\nStart Game with prefered settings: "+ board_gameMode);
         postNewGame(PostClient,  board_gameMode);
       } 
     }  
+
+    getStream(StreamClient);   
     dimLEDs = false;
-    getStream(StreamClient);
+    timerFlag = true;
 
     while (is_game_running)
     {   
-        moveStreamHandler();
+      moveStreamHandler();
 
-        if (myturn && is_game_running)
-        {
-        String accept_move = "no";  
-        
-        //print last move if move was detected
-        if (lastMove.length() == 4){
-            DEBUG_SERIAL.print("opponents move: ");
-            DEBUG_SERIAL.println(lastMove);
+      if (lastMove == myMove){// wait for oponents move
+        continue;       
+      }
 
-            // wait for oppents move to be played
-            DEBUG_SERIAL.println("wait for move accept...");
+      if (myturn & is_game_running  & lastMove != myMove & moves.length() > 3){ // accept opponents move
     
-            while(accept_move != lastMove && is_game_running){
-            displayMove(lastMove);
-            accept_move = getMoveInput();
-            // if king move is a castling move, wait for rook move
-            checkCastling(accept_move);
-            clearDisplay();
-            }
+        String accept_move = "no";  
 
-            DEBUG_SERIAL.println("move accepted!");
+        DEBUG_SERIAL.print("opponents move: ");
+        DEBUG_SERIAL.println(lastMove);
+
+        // wait for oppents move to be played
+        DEBUG_SERIAL.println("wait for move accept...");
+
+        while(accept_move != lastMove && is_game_running){
+        displayMove(lastMove);
+        accept_move = getMoveInput();
+        // if king move is a castling move, wait for rook move
+        checkCastling(accept_move);
+        clearDisplay();
+        
         }
-
-        // blocking, waits for move input
+        DEBUG_SERIAL.println("move accepted!");
+      }
+        
+      if (myturn & is_game_running & lastMove != myMove){ // play move
         postMove(PostClient);
-        }
+      }
     }
+    byte frame[8];
+    flickeringAnimation(frame);
+    clearDisplay();
+    DEBUG_SERIAL.println("game ended...");
+    ESP.restart();
   }
 }
+

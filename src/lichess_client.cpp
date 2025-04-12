@@ -6,26 +6,18 @@
  *  @return void
 */
 void postMove(WiFiClientSecure  &client) {
-
-  while (myturn && is_game_running)
-          {
-            clearDisplay();
             DEBUG_SERIAL.print("wait for move input...");
-            
             String move_input = getMoveInput();
             clearDisplay();
             DEBUG_SERIAL.print("my move: ");
             DEBUG_SERIAL.println(move_input);
-            disableGameTimer();
+            
             myMove = move_input;
-            if(is_game_running){
-              if (!client.connected()) {
-                  client.connect(server, 443);
-              }
+
+            if (!client.connected()) {
+                client.connect(server, 443);
             }
-            else{
-              break;
-            }
+
             client.print("POST /api/board/game/");
             client.print((String)currentGameID);
             client.print("/move/");
@@ -38,35 +30,7 @@ void postMove(WiFiClientSecure  &client) {
             client.println("\n");
             delay(100);
             char* char_response = catchResponseFromClient(client);
-            //DEBUG_SERIAL.println(char_response);
-            String moveSuccess = parseValueFromResponse(char_response, "ok");        
             client.stop();
-            
-            if (moveSuccess == "true") {
-              DEBUG_SERIAL.println("move success!");
-              myturn = false;
-              client.connect(server, 443);
-              enableGameTimer();
-            }
-            else
-            {        
-                DEBUG_SERIAL.println("wrong move!"); 
-                enableGameTimer();      
-                displayMove(myMove);
-                String reverse_move =  (String)myMove.charAt(2) 
-                +  (String)myMove.charAt(3)
-                +  (String)myMove.charAt(0)
-                +  (String)myMove.charAt(1);
-                
-                DEBUG_SERIAL.println(reverse_move);   
-                
-                while(reverse_move != move_input && is_game_running){
-                  move_input = getMoveInput();
-                  DEBUG_SERIAL.println(move_input);  
-                }
-            }
-          }
-      
 }
 
 /* ---------------------------------------
@@ -87,7 +51,7 @@ void getStream(WiFiClientSecure  &client){
     client.println(lichess_api_token);
     client.println("Connection: keep-alive");
     client.println("\n");
-    client.flush();
+    
   } 
 
 void disableClient(WiFiClientSecure  &client){
@@ -117,28 +81,48 @@ void getGameID(WiFiClientSecure  &client){
     client.println("Host: lichess.org");
     client.print("Authorization: Bearer ");
     client.println(lichess_api_token);
-    client.println("Connection: keep-alive");
+    client.println("Connection: close");
     client.println("\n"); 
 
     char* char_response = catchResponseFromClient(client);
     //DEBUG_SERIAL.print(char_response);
-    currentGameID = parseValueFromResponse(char_response, "gameId");
 
-    if (currentGameID.length() == 8){
+    JsonDocument doc;
+
+    if (parseJsonResponse(char_response, doc)) {
+        currentGameID = doc["nowPlaying"][0]["gameId"].as<String>();   
+    }
+
+    if (currentGameID.length() == 8){  
         DEBUG_SERIAL.print("current game id: ");
         DEBUG_SERIAL.println(currentGameID);
-        setStatePlaying();
-    
-        myturn = parseValueFromResponse(char_response, "isMyTurn");
-        DEBUG_SERIAL.print("my turn: ");
-        DEBUG_SERIAL.println(myturn);
 
-        lastMove = parseValueFromResponse(char_response, "lastMove");
+        bool myturn_temp  = doc["nowPlaying"][0]["isMyTurn"].as<String>();
+        DEBUG_SERIAL.print("my Turn: ");
+        DEBUG_SERIAL.println(myturn_temp);
+
+        if(myturn_temp){
+            myturn = true;
+        }
+
+        String lastMove_temp  = doc["nowPlaying"][0]["lastMove"].as<String>();
         DEBUG_SERIAL.print("last move: ");
-        DEBUG_SERIAL.println(lastMove);
-        disableClient(client);
+        DEBUG_SERIAL.println(lastMove_temp);
+
+        if(lastMove_temp.length() == 4){
+            lastMove = lastMove_temp;
+            moves = lastMove;
+        }
+        setStatePlaying();
+        client.flush();
+        client.stop();     
     }
-    delay(300);
+    else{
+        currentGameID = "noGame";
+        DEBUG_SERIAL.println("no Game found");
+        delay(300);
+    }
+    
 }
 
 char* catchResponseFromClient(WiFiClientSecure &client) {
@@ -163,52 +147,21 @@ char* catchResponseFromClient(WiFiClientSecure &client) {
     return char_response; 
 }
 
-
-String parseValueFromResponse(const char* response, const char* key) {
-    static char valueBuffer[256]; 
-    // Clear the buffer before use
-    memset(valueBuffer, 0, sizeof(valueBuffer));
-
-    String strResponse = String(response); 
-
-    int jsonStart = strResponse.indexOf('{');
-    if (jsonStart == -1) {
-        //DEBUG_SERIAL.println("JSON start not found.");
-        return "no"; // Return NULL if no JSON object is found
-    }
-    strResponse = strResponse.substring(jsonStart); 
-
-    String keyString = "\"" + String(key) + "\":";
-    int keyStart = strResponse.indexOf(keyString);
-    if (keyStart == -1) {
-        DEBUG_SERIAL.print(key);
-        DEBUG_SERIAL.println(" not found.");
-        return "no"; 
-    }
-    keyStart += keyString.length(); 
-
-    int valueEnd = strResponse.indexOf(',', keyStart);
-    if (valueEnd == -1) {
-        valueEnd = strResponse.indexOf('}', keyStart);
-    }
-    if (valueEnd == -1) {
-        valueEnd = strResponse.length(); 
+bool parseJsonResponse(const char* response, JsonDocument& doc) {
+    const char* jsonStart = strchr(response, '{');
+    if (!jsonStart) {
+        //DEBUG_SERIAL.println("No JSON object found in response!");
+        return false;
     }
 
-    String value = strResponse.substring(keyStart, valueEnd);
-
-    value.trim(); 
-
-    if (value.startsWith("\"")) {
-        value = value.substring(1);
-    }
-    if (value.endsWith("\"") || value.endsWith("}")) {
-        value = value.substring(0, value.length() - 1);
+    DeserializationError error = deserializeJson(doc, jsonStart);
+    if (error) {
+        DEBUG_SERIAL.print("JSON parse failed: ");
+        DEBUG_SERIAL.println(error.c_str());
+        return false;
     }
 
-    value.toCharArray(valueBuffer, sizeof(valueBuffer));
-
-    return value; 
+    return true;
 }
 
 void postNewGame(WiFiClientSecure &client, String board_gameMode) {
@@ -260,7 +213,7 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
        //DEBUG_SERIAL.print("Request Body: ");
         //DEBUG_SERIAL.println(requestBody);
     }
-  
+
     // Ensure client is connected
     if (!client.connected()) {
         client.connect("lichess.org", 443);
@@ -276,9 +229,10 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
     client.println(requestBody.length());  // Ensure correct content length
     client.println("Connection: close\r\n");  // Blank line before body
     client.println(requestBody);  // Send body
-    
-    delay(300);
+
     char* char_response = catchResponseFromClient(client);
     is_seeking = true;
-    //DEBUG_SERIAL.println(char_response);
+    //DEBUG_SERIAL.println(char_response);^
+    client.flush();
+    client.stop();
 }

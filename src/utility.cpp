@@ -52,11 +52,11 @@ void setStateBooting(void){
   is_connecting = false;
   is_updating = false;
   is_seeking = false;   
-  lastMove = "xy";
-  myMove = "xx";
-  moves = "no";
-  currentGameID = "noGame";
-  myturn = false;
+  lastMove = "noLastMove";
+  myMove = "noMove";
+  moves = "noMoves";
+  currentGameID = "noGameID";
+  //myturn = false;
 }
 
 void setStateUpdating(void){
@@ -65,11 +65,11 @@ void setStateUpdating(void){
   is_connecting = false;
   is_updating = true;
   is_seeking = false;   
-  lastMove = "xy";
-  myMove = "xx";
-  moves = "no";
-  currentGameID = "noGame";
-  myturn = false;
+  lastMove = "xx";
+  myMove = "yy";
+  moves = "";
+  currentGameID = "noGameID";
+  //myturn = false;
 }
 /* ---------------------------------------
  *  function to set connecting state and initializes state variables
@@ -82,11 +82,11 @@ void setStateConnecting(void){
   is_connecting  = true;
   is_updating = false;
   is_seeking = false;   
-  lastMove = "xy";
-  myMove = "xx";
-  moves = "no";
-  currentGameID = "noGame";
-  myturn = false;
+  lastMove = "xx";
+  myMove = "yy";
+  moves = "";
+  currentGameID = "noGameID";
+  //myturn = false;
 }
 
 void setStatePlaying(void){

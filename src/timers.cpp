@@ -3,7 +3,6 @@
 
 hw_timer_t *timer = NULL;
 volatile bool timerFlag = false;
-String game_status;
 
 // Interrupt Service Routine (ISR)
 void IRAM_ATTR onTimer() {
@@ -12,41 +11,52 @@ void IRAM_ATTR onTimer() {
               
 void gameTimerHandler() {
   DEBUG_SERIAL.println(".");
+
+  if (WiFi.status() != WL_CONNECTED){
+    DEBUG_SERIAL.println("lost connection...restarting...");
+    ESP.restart();
+  }
+
   if (!StreamClient.available()){
     return;
   }
 
-  if (is_game_running && !is_booting && !is_connecting)
-  { 
-    
     char* char_response = catchResponseFromClient(StreamClient);
+    //DEBUG_SERIAL.println(char_response);
 
-    String moves = parseValueFromResponse(char_response, "moves");
-    String game_status = parseValueFromResponse(char_response, "status");
+    JsonDocument doc;
+    String moves_temp;
+    String game_status = "";
 
-    // Detect Game restart
-    if (game_status != "started" && game_status != "no")
-    {
-      DEBUG_SERIAL.print("Game Status: ");
-      DEBUG_SERIAL.println(game_status);
-      setStateConnecting();
-      return;
+    if (parseJsonResponse(char_response, doc)) {
+        
+        moves_temp = doc["state"]["moves"].as<String>();
+        game_status = doc["state"]["status"].as<String>();
+
+        if (moves_temp == "null" | moves_temp == "" ){
+          moves_temp = doc["moves"].as<String>();
+          game_status = doc["status"].as<String>();
+        }
+
+      	if (moves_temp == "null" | moves_temp == "" ){
+          return;
+        }
+        moves = moves_temp;
+        DEBUG_SERIAL.println(moves);
+        lastMove = moves.substring(moves.length() - 4);
+
+        if (lastMove == myMove);{
+           myturn = true;
+        }
+
+        if (moves.length() > 3 & game_status != "started"){
+          is_game_running = false;
+        }
+          
     }
 
-    // Check Move
-    if (moves.length() > 3)
-    {
-      DEBUG_SERIAL.print("move received: ");
-      int startstr = moves.length() - 4; 
-      lastMove = moves.substring(startstr);
-      DEBUG_SERIAL.println(lastMove);
-    }
     
-    if (lastMove != myMove)
-    {
-      myturn = true;
-    }
-  }
+  
 }
 
 
