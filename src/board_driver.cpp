@@ -647,3 +647,13 @@ void displayWaitForGame(void) {
   delay(80);
   clearDisplay();
 }
+
+
+void displayMoveRecect(String move){
+  for (int k = 0; k < 3; k++){
+    clearDisplay();
+    delay(200);
+    displayMove(move);
+    delay(200); 
+  }
+}

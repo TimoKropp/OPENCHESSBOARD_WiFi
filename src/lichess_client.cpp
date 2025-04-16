@@ -5,7 +5,7 @@
  *  @params[in] WiFiClientSecure
  *  @return void
 */
-void postMove(WiFiClientSecure  &client, String move) {
+bool postMove(WiFiClientSecure  &client, String move) {
             if (!client.connected()) {
                 client.connect(server, 443);
             }
@@ -19,9 +19,20 @@ void postMove(WiFiClientSecure  &client, String move) {
             client.println(lichess_api_token);
             client.println("Connection: close");
             client.println("\n");
-            delay(100);
+            delay(200);
             char* char_response = catchResponseFromClient(client);
             client.stop();
+            //DEBUG_SERIAL.print(char_response);
+            JsonDocument doc;
+
+            bool moveSuccess = false;
+            if (parseJsonResponse(char_response, doc)) {
+                moveSuccess = doc["ok"].as<bool>();
+            }
+            if (moveSuccess){
+                DEBUG_SERIAL.print("move accepted");
+            }
+    return moveSuccess;
 }
 
 /* ---------------------------------------
@@ -88,7 +99,7 @@ void getGameID(WiFiClientSecure  &client){
         DEBUG_SERIAL.print("current game id: ");
         DEBUG_SERIAL.println(currentGameID);
 
-        bool myturn_temp  = doc["nowPlaying"][0]["isMyTurn"].as<String>();
+        bool myturn_temp  = doc["nowPlaying"][0]["isMyTurn"].as<bool>();
         DEBUG_SERIAL.print("my Turn: ");
         DEBUG_SERIAL.println(myturn_temp);
 
@@ -100,15 +111,15 @@ void getGameID(WiFiClientSecure  &client){
         DEBUG_SERIAL.print("last move: ");
         DEBUG_SERIAL.println(lastMove_temp);
 
-        if(lastMove_temp.length() == 4  & myturn){
+        if(lastMove_temp.length() == 4  & myturn){ //  last move was played by opponent and its my turn
             oppLastMove = lastMove_temp;
             latestMove = lastMove_temp;
-            moves = lastMove_temp;
+            moves = lastMove_temp; // complete  board history not yet available
         }
-        if(lastMove_temp.length() == 4  & !myturn){
+        if(lastMove_temp.length() == 4  & !myturn){ // last move was played by player and wait for opponent move 
             myLastMove = lastMove_temp;
             latestMove = lastMove_temp;
-            moves = lastMove_temp;
+            moves = lastMove_temp; // complete  board history not yet available
         }
         setStatePlaying();
         client.flush();

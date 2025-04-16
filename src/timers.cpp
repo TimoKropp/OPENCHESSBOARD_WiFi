@@ -53,10 +53,18 @@ void gameTimerHandler() {
         }
         else{
           myturn = true;
+          oppLastMove = latestMove;
         }
 
+        if (game_status == "started")
+        {
+          is_game_running = true;
+        }
+        
         if (moves.length() > 3 & game_status != "started"){
           is_game_running = false;
+          is_seeking = false;
+          myturn = false;
         }
           
     }
@@ -75,7 +83,7 @@ void gameTimerHandler() {
 void isr_setup(void) {
   timer = timerBegin(0, 80, true);
   timerAttachInterrupt(timer, &onTimer, true);
-  timerAlarmWrite(timer, 300000, true);
+  timerAlarmWrite(timer, 100000, true);
   timerAlarmEnable(timer);
 }
 

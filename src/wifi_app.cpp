@@ -64,31 +64,57 @@ void run_WiFi_app(void){
     getStream(StreamClient);   
     dimLEDs = false;
     timerFlag = true;
-    String boardMove = latestMove;
-    
-    while (is_game_running)
+    String boardMove = oppLastMove;
+
+    while (is_game_running | is_seeking)
     {   
       moveStreamHandler();
 
-      if (latestMove != myLastMove & boardMove != latestMove){ 
-        DEBUG_SERIAL.println("Wait for accept move");
-        displayMove(latestMove);
-        boardMove = getMoveInput(); 
+      if (myturn & latestMove == oppLastMove){ 
+        DEBUG_SERIAL.println("Wait for accept move input...");
+        while (boardMove != latestMove){
+          displayMove(latestMove);
+
+          boardMove = getMoveInput();
+          DEBUG_SERIAL.print("move played on board: ");
+          DEBUG_SERIAL.println(boardMove);
+          if (boardMove != latestMove){
+            displayMoveRecect(boardMove);
+            break;
+          }
+        }
+
       } 
 
-      if (myturn){
-        DEBUG_SERIAL.println("Wait for board move");
-        boardMove = getMoveInput(); 
-        postMove(PostClient, boardMove);
-        myLastMove = boardMove;
+      if (myturn & boardMove == oppLastMove){
+        DEBUG_SERIAL.println("Wait for board move input...");
+        bool moveSuccess = false; 
+        while(true){ // wait for sucessful move transmission to get to opponents turn
+          boardMove = getMoveInput();
+          DEBUG_SERIAL.print("move played on board: ");
+          DEBUG_SERIAL.println(boardMove);
+          DEBUG_SERIAL.println("try to send move...");
+          moveSuccess = postMove(PostClient, boardMove);
+
+          if (moveSuccess){
+            myLastMove = boardMove;
+            myturn = false;
+            break;
+          }
+          else{
+            DEBUG_SERIAL.println("invalid move. wait for move take back...");
+              displayMoveRecect(boardMove);
+              boardMove = getMoveInput();
+          }
+        }
       }
     }
-
+    
     byte frame[8];
     flickeringAnimation(frame);
     clearDisplay();
     DEBUG_SERIAL.println("game ended...");
     ESP.restart();
-  }
+  }  
 }
 

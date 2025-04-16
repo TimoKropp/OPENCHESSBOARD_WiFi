@@ -2,7 +2,7 @@
 #include "openchessboard.h"
 #include <ArduinoJson.h>
 
-extern void postMove(WiFiClientSecure  &client, String move);
+extern bool postMove(WiFiClientSecure  &client, String move);
 extern void getStream(WiFiClientSecure  &client);
 extern void disableClient(WiFiClientSecure  &client);
 extern void getGameID(WiFiClientSecure  &client);
