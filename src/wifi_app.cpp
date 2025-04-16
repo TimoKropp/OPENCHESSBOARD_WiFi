@@ -64,7 +64,7 @@ void run_WiFi_app(void){
     getStream(StreamClient);   
     dimLEDs = false;
     timerFlag = true;
-    String boardMove = oppLastMove;
+    String boardMove;
 
     while (is_game_running | is_seeking)
     {   
@@ -76,8 +76,15 @@ void run_WiFi_app(void){
           displayMove(latestMove);
 
           boardMove = getMoveInput();
+          String swapped_move = boardMove.substring(2, 4) + boardMove.substring(0, 2);
+          if(boardMove.substring(0, 2) == boardMove.substring(2, 4) | swapped_move == latestMove){
+            boardMove = latestMove;
+            break;
+          }
           DEBUG_SERIAL.print("move played on board: ");
           DEBUG_SERIAL.println(boardMove);
+
+
           if (boardMove != latestMove){
             displayMoveRecect(boardMove);
             break;
@@ -86,25 +93,37 @@ void run_WiFi_app(void){
 
       } 
 
-      if (myturn & boardMove == oppLastMove){
+      if (myturn){
         DEBUG_SERIAL.println("Wait for board move input...");
         bool moveSuccess = false; 
-        while(true){ // wait for sucessful move transmission to get to opponents turn
+        while(is_game_running){ // wait for sucessful move transmission to get to opponents turn
           boardMove = getMoveInput();
           DEBUG_SERIAL.print("move played on board: ");
           DEBUG_SERIAL.println(boardMove);
           DEBUG_SERIAL.println("try to send move...");
           moveSuccess = postMove(PostClient, boardMove);
-
+          bool once = true;
+          String swapped_move;
           if (moveSuccess){
             myLastMove = boardMove;
             myturn = false;
             break;
           }
           else{
+            if (once){
+              swapped_move = boardMove.substring(2, 4) + boardMove.substring(0, 2);
+              moveSuccess = postMove(PostClient,swapped_move);
+              once = false;
+            }
+            if(moveSuccess){
+              boardMove = swapped_move;
+              myLastMove = boardMove;
+              myturn = false;
+              break;
+            }
             DEBUG_SERIAL.println("invalid move. wait for move take back...");
-              displayMoveRecect(boardMove);
-              boardMove = getMoveInput();
+            displayMoveRecect(boardMove);
+            boardMove = getMoveInput();
           }
         }
       }
