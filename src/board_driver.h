@@ -17,5 +17,5 @@ extern void calculateDifference(byte result[], byte a[], byte b[]);
 extern void displayNewGame(void);
 extern void displayWaitForGame(void);
 
-extern String getFen(void);
+extern String createFen(void);
 extern bool areFensSame(const String& peripheralFen, const String& centralFen);

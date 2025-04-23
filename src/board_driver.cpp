@@ -285,7 +285,7 @@ String getMoveInput(void) {
 
 }
 
-inline String getRow(const byte hallBoardState[], int row_index) {
+inline String createRow(const byte hallBoardState[], int row_index) {
   String row{};
   int count = 0;
   for (int col_index = 0; col_index < 8; col_index++) {
@@ -303,23 +303,23 @@ inline String getRow(const byte hallBoardState[], int row_index) {
   return row;
 }
 
-inline String getPiecesPlacement(const byte hallBoardState[]) {
+inline String createPiecesPlacement(const byte hallBoardState[]) {
   String piecesPlacement{};
 
   for (int row_index = 7; row_index > 0; row_index--) {
-    piecesPlacement += getRow(hallBoardState, row_index);
+    piecesPlacement += createRow(hallBoardState, row_index);
     piecesPlacement += '/';
   }
-  piecesPlacement += getRow(hallBoardState, 0);
+  piecesPlacement += createRow(hallBoardState, 0);
   return piecesPlacement;
 }
 
-String getFen(void) {
+String createFen(void) {
   byte hallBoardState[8];
   readHall(hallBoardState);
   rotate90CounterClockwise(hallBoardState);
 
-  return getPiecesPlacement(hallBoardState);
+  return createPiecesPlacement(hallBoardState);
 }
 
 bool areFensSame(const String& peripheralFen, const String& centralFen) {

@@ -1,4 +1,4 @@
-#include "OpenChessBoard.h"
+#include "openchessboard.h"
 
 byte swapBits(byte b) {
     byte swapped = 0;
