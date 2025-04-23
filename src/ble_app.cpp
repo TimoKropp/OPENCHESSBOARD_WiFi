@@ -157,7 +157,6 @@ public:
   }
 
   void onCentralCheck(const BleChessString& kingPos) override {
-    clearDisplay();
     DEBUG_SERIAL.print("check: ");
     DEBUG_SERIAL.println(kingPos.c_str());
   }
