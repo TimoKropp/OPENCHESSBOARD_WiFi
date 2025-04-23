@@ -127,6 +127,7 @@ public:
 
   void onCentralEnd(const BleChessString& reason) override {
     clearDisplay();
+    game_running = false;
     DEBUG_SERIAL.print("end: ");
     DEBUG_SERIAL.println(reason.c_str());
 
