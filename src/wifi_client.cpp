@@ -73,7 +73,7 @@ String fetchMetaData(const char* metadata_url) {
 
   String response = client.readString();
   client.stop();
-  delay(1000);
+  //delay(1000);
 
   return response;
 }

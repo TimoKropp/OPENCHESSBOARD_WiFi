@@ -133,6 +133,9 @@ void run_WiFi_app(void){
     flickeringAnimation(frame);
     clearDisplay();
     DEBUG_SERIAL.println("game ended...");
+    disableClient(StreamClient);
+    disableClient(PostClient);
+    WiFi.disconnect(true,true);
     ESP.restart();
   }  
 }
