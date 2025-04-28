@@ -197,13 +197,14 @@ public:
 
   void checkPeripheralMove() {
     if (!isSynchronized) {
-      isSynchronized = areFensSame(createFen(), centralFen.c_str());
+      String peripheralFen = createFen();
+      isSynchronized = areFensSame(peripheralFen, centralFen.c_str());
       if (!isSynchronized) {
-        sendPeripheralState(createFen().c_str());
+        sendPeripheralState(peripheralFen.c_str());
         delay(300);
         return;
       }
-      sendPeripheralSync(createFen().c_str());
+      sendPeripheralSync(peripheralFen.c_str());
     }
 
     BleChessString move = getMoveInput().c_str();
