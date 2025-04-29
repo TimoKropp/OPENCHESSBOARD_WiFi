@@ -100,6 +100,7 @@ public:
     isSynchronized ?
       sendPeripheralSync(peripheralFen.c_str()) :
       sendPeripheralUnsync(peripheralFen.c_str());
+    DEBUG_SERIAL.print(isSynchronized ? "synchronized" : "unsynchronized");
   }
 
   void onCentralMove(const BleChessString& mv) override {
@@ -204,6 +205,7 @@ public:
         delay(300);
         return;
       }
+      DEBUG_SERIAL.print("synchronized");
       sendPeripheralSync(peripheralFen.c_str());
     }
 
