@@ -165,7 +165,7 @@ void rotate90CounterClockwise(uint8_t hallBoardState[8]) {
 String getMoveInput(void) {
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
   String mvInput;
-
+  //DEBUG_SERIAL.println("trace: getMoveInput");
   #ifdef MANUAL_MOVE_INPUT
     DEBUG_SERIAL.println("Enter a move with keyboard:");
     // Wait here until data is available
@@ -221,7 +221,7 @@ String getMoveInput(void) {
         }
       }
     }
-    if (StreamClient.available()){
+    if (StreamClient.available() & board_startupType == "WiFi"){
       moveStreamHandler();
     }
   }
@@ -261,7 +261,7 @@ String getMoveInput(void) {
         }
       }
     }
-    if (StreamClient.available()){
+    if (StreamClient.available() & board_startupType == "WiFi"){
       moveStreamHandler();
     }
   }
@@ -318,6 +318,7 @@ String createFen(void) {
   byte hallBoardState[8];
   readHall(hallBoardState);
   rotate90CounterClockwise(hallBoardState);
+  rotate180(hallBoardState);
 
   return createPiecesPlacement(hallBoardState);
 }
