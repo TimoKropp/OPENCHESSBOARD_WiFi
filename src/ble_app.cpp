@@ -191,6 +191,7 @@ public:
   
   void synchronize() {
     if (!isSynchronized) {
+      DEBUG_SERIAL.println("synchronized");
       sendPeripheralSync(createFen().c_str());
     }
     isSynchronized = true;
