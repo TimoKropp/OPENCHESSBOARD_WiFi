@@ -10,9 +10,8 @@
 bool skip_next_send = false;
 bool my_castling_rights = true;
 bool opp_castling_rights = true;
-
-bool game_running = false;
 bool first_run = true;
+bool forceSync = false;
 
 bool isCastling(BleChessString move_input) {
   // check if last move was king move from castling
@@ -90,13 +89,18 @@ public:
   void onCentralBegin(const BleChessString& fen) override {
     clearDisplay();
     displayNewGame();
-    game_running = true;
+    is_game_running = true;
     DEBUG_SERIAL.print("begin: ");
     DEBUG_SERIAL.println(fen.c_str());
     
     String peripheralFen = createFen();
     centralFen = fen;
+    if (forceSync){
+      peripheralFen = centralFen.c_str(); 
+    }
     isSynchronized = areFensSame(peripheralFen, centralFen.c_str());
+    DEBUG_SERIAL.print("peripheralFen: ");
+    DEBUG_SERIAL.println(peripheralFen);
     isSynchronized ?
       sendPeripheralSync(peripheralFen.c_str()) :
       sendPeripheralUnsync(peripheralFen.c_str());
@@ -105,16 +109,18 @@ public:
 
   void onCentralMove(const BleChessString& mv) override {
     clearDisplay();
-    if (game_running){
-      DEBUG_SERIAL.print("move: ");
+    if (is_game_running){
+      DEBUG_SERIAL.print("central move: ");
       DEBUG_SERIAL.println(mv.c_str());
-      synchronize();
+      //synchronize();
       displayMove(mv.c_str());
+      oppLastMove = mv.c_str();
       skip_next_send = true;
     }
   }
 
   void onPeripheralMoveAck(bool ack) override {
+    //DEBUG_SERIAL.print("trace: onPeripheralMoveAck");
     clearDisplay();
     ack ?
       onMoveAccepted() :
@@ -128,7 +134,7 @@ public:
 
   void onCentralEnd(const BleChessString& reason) override {
     clearDisplay();
-    game_running = false;
+    is_game_running = false;
     DEBUG_SERIAL.print("end: ");
     DEBUG_SERIAL.println(reason.c_str());
 
@@ -156,6 +162,7 @@ public:
     DEBUG_SERIAL.print("last move: ");
     DEBUG_SERIAL.println(mv.c_str());
     displayMove(mv.c_str());
+    oppLastMove = mv.c_str();
   }
 
   void onCentralCheck(const BleChessString& kingPos) override {
@@ -164,7 +171,7 @@ public:
   }
 
   void onMoveAccepted() {
-    if (game_running) {
+    if (is_game_running) {
       clearDisplay();
       DEBUG_SERIAL.print("move accepted: ");
       DEBUG_SERIAL.println(lastPeripheralMove.c_str());
@@ -176,7 +183,7 @@ public:
   }
 
   void onMoveRejected() {
-    if (game_running) {
+    if (is_game_running) {
       DEBUG_SERIAL.print("move rejected: ");
       DEBUG_SERIAL.println(lastPeripheralMove.c_str());
       for (int k = 0; k < 3; k++){
@@ -190,6 +197,7 @@ public:
   }
   
   void synchronize() {
+    //DEBUG_SERIAL.print("trace: synchronize");
     if (!isSynchronized) {
       sendPeripheralSync(createFen().c_str());
     }
@@ -197,8 +205,12 @@ public:
   }
 
   void checkPeripheralMove() {
+    //DEBUG_SERIAL.print("trace: checkPeripheralMove");
     if (!isSynchronized) {
       String peripheralFen = createFen();
+      if (forceSync){
+        peripheralFen = centralFen.c_str(); 
+      }
       isSynchronized = areFensSame(peripheralFen, centralFen.c_str());
       if (!isSynchronized) {
         sendPeripheralState(peripheralFen.c_str());
@@ -219,7 +231,7 @@ public:
     DEBUG_SERIAL.println(move.c_str());
     
     clearDisplay();
-    if (!skip_next_send) {
+    if (!skip_next_send & move != "") {
       sendPeripheralMove(move);
       lastPeripheralMove = move;
     }
@@ -251,9 +263,11 @@ void run_BLE_app(){
     BLE.poll();
   #endif
 
-  while(!game_running){
+  while(!is_game_running){
     ArduinoBleOTA.pull();
     displayWaitForGame();
   }
-  peripheral.checkPeripheralMove();
+  while(true){ // while BLE connected
+    peripheral.checkPeripheralMove();
+  }
 }
