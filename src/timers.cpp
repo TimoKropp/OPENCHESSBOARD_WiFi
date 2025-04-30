@@ -1,5 +1,6 @@
 
 #include "openchessboard.h"
+#include <Logger.h>
 
 hw_timer_t *timer = NULL;
 volatile bool timerFlag = false;
@@ -10,10 +11,10 @@ void IRAM_ATTR onTimer() {
 }
               
 void gameTimerHandler() {
-  DEBUG_SERIAL.println(".");
+  LOG_INFO << ".";
 
   if (WiFi.status() != WL_CONNECTED){
-    DEBUG_SERIAL.println("lost connection...restarting...");
+    LOG_INFO << "Lost connection...restarting...";
     ESP.restart();
   }
 
@@ -22,7 +23,7 @@ void gameTimerHandler() {
   }
 
     char* char_response = catchResponseFromClient(StreamClient);
-    //DEBUG_SERIAL.println(char_response);
+    LOG_DEBUG << "Response: " << char_response;
 
     JsonDocument doc;
     String moves_temp;
@@ -44,7 +45,7 @@ void gameTimerHandler() {
         }
 
         moves = moves_temp;
-        DEBUG_SERIAL.println(moves);
+        LOG_INFO << moves;
 
         latestMove = moves.substring(moves.length() - 4);
 

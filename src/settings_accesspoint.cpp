@@ -1,5 +1,6 @@
 #include "openchessboard.h"
 #include "html_content.h"
+#include <Logger.h>
 
 // Create a web server on port 80 (default HTTP port)
 
@@ -28,29 +29,25 @@ String getFormData(String request, String key) {
 void AP_setup(WiFiServer &APserver) {
   // Start ESP32 in Access Point mode
   if (WiFi.softAP(ssidAP, passwordAP)) {
-    DEBUG_SERIAL.println("Access Point started");
-    DEBUG_SERIAL.print("SSID: ");
-    DEBUG_SERIAL.println(ssidAP);
+    LOG_INFO << "Access Point started";
+    LOG_INFO << "SSID: " << ssidAP;
 
     // Display IP address
     IPAddress IP = WiFi.softAPIP();
-    DEBUG_SERIAL.print("AP IP address: ");
-    DEBUG_SERIAL.println(IP);
+    LOG_INFO << "AP IP address: " << IP;
 
     // Start the server
     APserver.begin();
-    DEBUG_SERIAL.println("AP Server started");
+    LOG_INFO << "AP Server started";
 
     // Initialize mDNS
     if (MDNS.begin(domainName)) {
-      DEBUG_SERIAL.print("mDNS responder started. Access your device at http://");
-      Serial.print(domainName);
-      DEBUG_SERIAL.println(".local");
+      LOG_INFO << "mDNS responder started. Access your device at http://" << domainName << ".local";
     } else {
-      DEBUG_SERIAL.println("Error setting up mDNS responder!");
+      LOG_INFO << "Error setting up mDNS responder!";
     }
   } else {
-    DEBUG_SERIAL.println("Failed to start Access Point");
+    LOG_INFO << "Failed to start Access Point";
   }
 }
 
@@ -79,8 +76,8 @@ bool handleAPClientRequest(WiFiClient &client) {
           client.println("Connection: close");
           client.println("");
           // Serve the HTML content from the string
-          DEBUG_SERIAL.println("HTML CONTENT");
-          DEBUG_SERIAL.println(htmlContent);
+          LOG_INFO << "HTML CONTENT";
+          LOG_INFO << htmlContent;
           client.print(htmlContent);  // Use the simple array for HTML content
 
           break;
@@ -148,11 +145,11 @@ void run_APsettings(void){
 
     if (client) {
       settings_updated = handleAPClientRequest(client);
-      DEBUG_SERIAL.println("\nClient handling...");
+      LOG_INFO << "Client handling...";
     }
   }
   delay(2000);
-  DEBUG_SERIAL.println("\nRestarting");
+  LOG_INFO << "Restarting";
   ESP.restart(); 
 
 }
