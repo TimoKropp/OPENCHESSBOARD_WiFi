@@ -27,7 +27,7 @@ bool isCastling(BleChessString move_input) {
     if (opp_castling_rights)
     {
       opp_castling_rights = false;
-      DEBUG_SERIAL.print("opponent castle move...");
+      DEBUG_SERIAL.println("opponent castle move...");
       return true;
     }
   }
@@ -79,11 +79,11 @@ public:
     DEBUG_SERIAL.println(side.c_str());
 
     if (side == BleChessSide::White) {
-      DEBUG_SERIAL.print("white side");
+      DEBUG_SERIAL.println("white side");
     } else if (side == BleChessSide::Black) {
-      DEBUG_SERIAL.print("black side");
+      DEBUG_SERIAL.println("black side");
     } else if (side == BleChessSide::Both) {
-      DEBUG_SERIAL.print("both sides");
+      DEBUG_SERIAL.println("both sides");
     }
   }
 
@@ -100,7 +100,7 @@ public:
     isSynchronized ?
       sendPeripheralSync(peripheralFen.c_str()) :
       sendPeripheralUnsync(peripheralFen.c_str());
-    DEBUG_SERIAL.print(isSynchronized ? "synchronized" : "unsynchronized");
+    DEBUG_SERIAL.println(isSynchronized ? "synchronized" : "unsynchronized");
   }
 
   void onCentralMove(const BleChessString& mv) override {
@@ -133,21 +133,21 @@ public:
     DEBUG_SERIAL.println(reason.c_str());
 
     if (reason == BleChessEndReason::Checkmate) {
-      DEBUG_SERIAL.print("checkmate");
+      DEBUG_SERIAL.println("checkmate");
     } else if (reason == BleChessEndReason::Draw) {
-      DEBUG_SERIAL.print("draw");
+      DEBUG_SERIAL.println("draw");
     } else if (reason == BleChessEndReason::Timeout) {
-      DEBUG_SERIAL.print("timeout");
+      DEBUG_SERIAL.println("timeout");
     } else if (reason == BleChessEndReason::Resign) {
-      DEBUG_SERIAL.print("resign");
+      DEBUG_SERIAL.println("resign");
     } else if (reason == BleChessEndReason::Abort) {
-      DEBUG_SERIAL.print("abort");
+      DEBUG_SERIAL.println("abort");
     } else if (reason == BleChessEndReason::Undefined) {
-      DEBUG_SERIAL.print("variant end");
+      DEBUG_SERIAL.println("variant end");
     } else if (reason == BleChessVariantReason::ThreeCheck) {
-      DEBUG_SERIAL.print("tree check");
+      DEBUG_SERIAL.println("tree check");
     } else if (reason == BleChessVariantReason::KingOfTheHill) {
-      DEBUG_SERIAL.print("king of the hill");
+      DEBUG_SERIAL.println("king of the hill");
     }
   }
 
@@ -205,7 +205,7 @@ public:
         delay(300);
         return;
       }
-      DEBUG_SERIAL.print("synchronized");
+      DEBUG_SERIAL.println("synchronized");
       sendPeripheralSync(peripheralFen.c_str());
     }
 
