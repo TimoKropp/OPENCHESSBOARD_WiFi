@@ -83,7 +83,6 @@ void run_WiFi_app(void){
           }
           LOG_INFO << "Move played on board: " << boardMove;
 
-
           if (boardMove != latestMove){
             displayMoveRecect(boardMove);
             break;
