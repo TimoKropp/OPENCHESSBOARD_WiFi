@@ -10,7 +10,7 @@ void setup() {
   initHW();
   isr_setup();
   
-#ifndef LOG_LEVEL_DISABLED
+#ifndef LOG_LVL_DISABLED
   //Initialize Serial and wait for port to open:
   Serial.begin(115200);
   while (not Serial);
