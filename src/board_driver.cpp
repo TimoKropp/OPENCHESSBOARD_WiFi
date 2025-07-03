@@ -221,7 +221,7 @@ String getMoveInput(void) {
         }
       }
     }
-    if (StreamClient.available() & board_startupType == "WiFi"){
+    if (StreamClient.available() && board_startupType == "WiFi"){
       moveStreamHandler();
     }
   }
@@ -261,7 +261,7 @@ String getMoveInput(void) {
         }
       }
     }
-    if (StreamClient.available() & board_startupType == "WiFi"){
+    if (StreamClient.available() && board_startupType == "WiFi"){
       moveStreamHandler();
     }
   }
