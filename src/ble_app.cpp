@@ -113,8 +113,8 @@ public:
     LOG_DEBUG << "Move ack: " << ack;
     clearDisplay();
     ack ?
-      onMoveAccepted() :
-      onMoveRejected();
+      handleMoveAccepted() :
+      handleMoveRejected();
   }
 
   void handlePeripheralMovePromoted(BleChessStringView mv) override {
@@ -157,7 +157,7 @@ public:
     LOG_INFO << "Check: " << kingPos;
   }
 
-  void onMoveAccepted() {
+  void handleMoveAccepted() {
     if (is_game_running) {
       clearDisplay();
       LOG_INFO << "Move accepted: " << lastPeripheralMove;
@@ -168,7 +168,7 @@ public:
     }
   }
 
-  void onMoveRejected() {
+  void handleMoveRejected() {
     if (is_game_running) {
       LOG_INFO << "Move rejected: " << lastPeripheralMove;
       for (int k = 0; k < 3; k++){
