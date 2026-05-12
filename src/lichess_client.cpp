@@ -1,4 +1,5 @@
 #include "openchessboard.h"
+#include <Logger.h>
 /* ---------------------------------------
  *  Function to send post move request to Lichess API.
  *  Restarts client and stops client after request 
@@ -22,7 +23,7 @@ bool postMove(WiFiClientSecure  &client, String move) {
             delay(200);
             char* char_response = catchResponseFromClient(client);
             client.stop();
-            //DEBUG_SERIAL.print(char_response);
+            LOG_DEBUG << "Response: " << char_response;
             JsonDocument doc;
 
             bool moveSuccess = false;
@@ -30,7 +31,7 @@ bool postMove(WiFiClientSecure  &client, String move) {
                 moveSuccess = doc["ok"].as<bool>();
             }
             if (moveSuccess){
-                DEBUG_SERIAL.print("move accepted");
+                LOG_INFO << "Move accepted";
             }
     return moveSuccess;
 }
@@ -87,7 +88,7 @@ void getGameID(WiFiClientSecure  &client){
     client.println("\n"); 
 
     char* char_response = catchResponseFromClient(client);
-    //DEBUG_SERIAL.print(char_response);
+    LOG_DEBUG << "Response: " << char_response;
 
     JsonDocument doc;
 
@@ -96,20 +97,17 @@ void getGameID(WiFiClientSecure  &client){
     }
 
     if (currentGameID.length() == 8){  
-        DEBUG_SERIAL.print("current game id: ");
-        DEBUG_SERIAL.println(currentGameID);
+        LOG_INFO << "Current game ID: " << currentGameID;
 
         bool myturn_temp  = doc["nowPlaying"][0]["isMyTurn"].as<bool>();
-        DEBUG_SERIAL.print("my Turn: ");
-        DEBUG_SERIAL.println(myturn_temp);
+        LOG_INFO << "My Turn: " << myturn_temp;
 
         if(myturn_temp){
             myturn = true;
         }
 
         String lastMove_temp  = doc["nowPlaying"][0]["lastMove"].as<String>();
-        DEBUG_SERIAL.print("last move: ");
-        DEBUG_SERIAL.println(lastMove_temp);
+        LOG_INFO << "Last move: " << lastMove_temp;
 
         if(lastMove_temp.length() == 4  & myturn){ //  last move was played by opponent and its my turn
             oppLastMove = lastMove_temp;
@@ -127,7 +125,7 @@ void getGameID(WiFiClientSecure  &client){
     }
     else{
         currentGameID = "noGame";
-        DEBUG_SERIAL.println("no Game found");
+        LOG_INFO << "No game found";
         delay(300);
     }
     
@@ -158,14 +156,13 @@ char* catchResponseFromClient(WiFiClientSecure &client) {
 bool parseJsonResponse(const char* response, JsonDocument& doc) {
     const char* jsonStart = strchr(response, '{');
     if (!jsonStart) {
-        //DEBUG_SERIAL.println("No JSON object found in response!");
+        LOG_DEBUG << "No JSON object found in response!";
         return false;
     }
 
     DeserializationError error = deserializeJson(doc, jsonStart);
     if (error) {
-        DEBUG_SERIAL.print("JSON parse failed: ");
-        DEBUG_SERIAL.println(error.c_str());
+        LOG_INFO << "JSON parse failed: " << error;
         return false;
     }
 
@@ -186,17 +183,15 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
         // AI Challenge Mode
         int level = board_gameMode.substring(9).toInt();  // Extract and convert to integer
         if (level < 1 || level > 8) {
-            DEBUG_SERIAL.println("Invalid AI level.");
+            LOG_INFO << "Invalid AI level.";
             return;
         }
         
         endpoint = "/api/challenge/ai";  // API endpoint
         requestBody = "level=" + String(level) + "&rated=" + rated_str + "&variant=" + variant; // Correct format
 
-        DEBUG_SERIAL.print("AI Challenge Endpoint: ");
-        DEBUG_SERIAL.println(endpoint);
-        //DEBUG_SERIAL.print("Request Body: ");
-        //DEBUG_SERIAL.println(requestBody);
+        LOG_INFO << "AI Challenge Endpoint: " << endpoint;
+        LOG_DEBUG << "Request Body: " << requestBody;
     } else {
         // Human Seek Mode
         int plusPos = board_gameMode.indexOf('+');
@@ -204,7 +199,7 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
             initialStr = board_gameMode.substring(0, plusPos);
             incrementStr = board_gameMode.substring(plusPos + 1);
         } else {
-            DEBUG_SERIAL.println("Invalid time control format.");
+            LOG_INFO << "Invalid time control format.";
             return;
         }
 
@@ -216,10 +211,8 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
                       "&variant=" + variant + 
                       "&ratingRange=" + ratingRange;
         
-        DEBUG_SERIAL.print("Human Seek Endpoint: ");
-        DEBUG_SERIAL.println(endpoint);
-       //DEBUG_SERIAL.print("Request Body: ");
-        //DEBUG_SERIAL.println(requestBody);
+        LOG_INFO << "Human Seek Endpoint: " << endpoint;
+        LOG_DEBUG << "Request Body: " << requestBody;
     }
 
     // Ensure client is connected
@@ -240,7 +233,7 @@ void postNewGame(WiFiClientSecure &client, String board_gameMode) {
 
     char* char_response = catchResponseFromClient(client);
     is_seeking = true;
-    //DEBUG_SERIAL.println(char_response);^
+    LOG_DEBUG << "Response: " << char_response;
     client.flush();
     client.stop();
 }

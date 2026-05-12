@@ -1,5 +1,5 @@
 #include "openchessboard.h"
-
+#include <Logger.h>
 
 
 // LED and state variables
@@ -40,23 +40,23 @@ void run_WiFi_app(void){
 
   PostClient.setInsecure();
   StreamClient.setInsecure();
-  DEBUG_SERIAL.println("\nStarting connection to server...");
+  LOG_INFO << "Starting connection to server...";
  
   while (WiFi.status() == WL_CONNECTED){
-    DEBUG_SERIAL.println("\nConnected to Server...");
-    DEBUG_SERIAL.println("Find ongoing game");
+    LOG_INFO << "Connected to Server...";
+    LOG_INFO << "Find ongoing game";
 
     while(!is_game_running){
       getGameID(PostClient);
       
       //Start new game if no game is running and seek not already started
       if (board_gameMode != "None"  && !is_seeking &&  !is_game_running){
-        DEBUG_SERIAL.println("\nWait for Starting Position");   
+        LOG_INFO << "Wait for Starting Position";   
         while(!isStartingPosition()){
           delay(100);
         }
         
-        DEBUG_SERIAL.println("\nStart Game with prefered settings: "+ board_gameMode);
+        LOG_INFO << "Start Game with preferred settings: " << board_gameMode;
         postNewGame(PostClient,  board_gameMode);
       } 
     }  
@@ -71,7 +71,7 @@ void run_WiFi_app(void){
       moveStreamHandler();
 
       if (myturn & latestMove == oppLastMove){ 
-        DEBUG_SERIAL.println("Wait for accept move input...");
+        LOG_INFO << "Wait for accept move input...";
         while (boardMove != latestMove){
           displayMove(latestMove);
 
@@ -81,9 +81,7 @@ void run_WiFi_app(void){
             boardMove = latestMove;
             break;
           }
-          DEBUG_SERIAL.print("move played on board: ");
-          DEBUG_SERIAL.println(boardMove);
-
+          LOG_INFO << "Move played on board: " << boardMove;
 
           if (boardMove != latestMove){
             displayMoveRecect(boardMove);
@@ -94,13 +92,12 @@ void run_WiFi_app(void){
       } 
 
       if (myturn){
-        DEBUG_SERIAL.println("Wait for board move input...");
+        LOG_INFO << "Wait for board move input...";
         bool moveSuccess = false; 
         while(is_game_running){ // wait for sucessful move transmission to get to opponents turn
           boardMove = getMoveInput();
-          DEBUG_SERIAL.print("move played on board: ");
-          DEBUG_SERIAL.println(boardMove);
-          DEBUG_SERIAL.println("try to send move...");
+          LOG_INFO << "Move played on board: " << boardMove;
+          LOG_INFO << "Try to send move...";
           moveSuccess = postMove(PostClient, boardMove);
           bool once = true;
           String swapped_move;
@@ -121,7 +118,7 @@ void run_WiFi_app(void){
               myturn = false;
               break;
             }
-            DEBUG_SERIAL.println("invalid move. wait for move take back...");
+            LOG_INFO << "Invalid move. Wait for move take back...";
             displayMoveRecect(boardMove);
             boardMove = getMoveInput();
           }
@@ -132,7 +129,7 @@ void run_WiFi_app(void){
     byte frame[8];
     flickeringAnimation(frame);
     clearDisplay();
-    DEBUG_SERIAL.println("game ended...");
+    LOG_INFO << "Game ended...";
     disableClient(StreamClient);
     disableClient(PostClient);
     WiFi.disconnect(true,true);

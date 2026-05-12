@@ -1,4 +1,5 @@
 #include "openchessboard.h"
+#include <Logger.h>
 /* ---------------------------------------
  *  function to get substring between string firstdel and enddel
  *  @params[in] void
@@ -19,7 +20,7 @@ void checkCastling(String move_input) {
   //check if last move was king move from castling
   if(((move_input == "e1g1") || (move_input == "e1c1") ||  (move_input == "e8g8") || (move_input == "e8c8")) && is_castling_allowed){
     
-   DEBUG_SERIAL.println("Castling... Wait for rook move...");
+   LOG_INFO << "Castling... Wait for rook move...";
    
    bool is_castling = true;
    
@@ -27,7 +28,7 @@ void checkCastling(String move_input) {
    while(is_castling && is_game_running){
     displayMove(myLastMove);
     move_input = getMoveInput();
-    DEBUG_SERIAL.println(move_input);
+    LOG_INFO << move_input;
     
     if((move_input == "h1f1") || (move_input == "a1d1") ||  (move_input == "h8f8") || (move_input == "a8d8"))
     {
@@ -135,14 +136,14 @@ void readSettings(void){
     lichess_api_token = urlDecode(preferences.getString("token", ""));
     board_gameMode = urlDecode(preferences.getString("gameMode", ""));
     board_startupType = preferences.getString("startupType", "");
-    DEBUG_SERIAL.println("Settings Loaded from Flash:");
-    DEBUG_SERIAL.println("SSID: " + wifi_ssid);
-    DEBUG_SERIAL.println("Password: " + wifi_password);
-    DEBUG_SERIAL.println("Token: " + lichess_api_token);
-    DEBUG_SERIAL.println("Game Mode: " + board_gameMode);
-    DEBUG_SERIAL.println("Startup Type: " + board_startupType);
+    LOG_INFO << "Settings Loaded from Flash:";
+    LOG_INFO << "SSID: " << wifi_ssid;
+    LOG_INFO << "Password: " << wifi_password;
+    LOG_INFO << "Token: " << lichess_api_token;
+    LOG_INFO << "Game Mode: " << board_gameMode;
+    LOG_INFO << "Startup Type: " << board_startupType;
   } else {
-    DEBUG_SERIAL.println("No settings found, using default values.");
+    LOG_INFO << "No settings found, using default values.";
   }
   preferences.end();
 }
@@ -187,15 +188,15 @@ void readBoardSelection(){
   
 
   readHall(read_hall_array);
-  DEBUG_SERIAL.print("read_hall_array: ");
-
+  LOG_BEGIN_INFO << "read_hall_array: ";
   for (int i = 0; i < 8; i++) {
       Serial.print(read_hall_array[i], HEX);
       if (i < 8 - 1) {
-          DEBUG_SERIAL.print(", "); 
+          LOG_ADD_INFO << ", ";
       }
   }
-    DEBUG_SERIAL.println(); // Newline at the end
+  LOG_END_INFO; // Newline at the end
+
   if (memcmp(read_hall_array, pattern1, 8) == 0){
     board_startupType = "WiFi";
   }

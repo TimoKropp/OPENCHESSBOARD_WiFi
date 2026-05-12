@@ -1,4 +1,5 @@
 #include "openchessboard.h"
+#include <Logger.h>
 
 //HW GPIO configuration
 
@@ -124,7 +125,7 @@ void readHall(byte read_hall_array[]) {
       
       hall_val = analogRead(HALL_SENSE);
       delayMicroseconds(500);
-      //DEBUG_SERIAL.println(hall_val);
+      LOG_DEBUG << "Hall: " << hall_val;
       if (hall_val < SENSE_THRS) {
         read_hall_array[row_index] |= 1UL << (col_index);
       }
@@ -165,9 +166,9 @@ void rotate90CounterClockwise(uint8_t hallBoardState[8]) {
 String getMoveInput(void) {
   const char columns[] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
   String mvInput;
-  //DEBUG_SERIAL.println("trace: getMoveInput");
+  LOG_TRACE << "Get move input";
   #ifdef MANUAL_MOVE_INPUT
-    DEBUG_SERIAL.println("Enter a move with keyboard:");
+    Serial.println("Enter a move with keyboard: ");
     // Wait here until data is available
 
     while (!Serial.available() && is_game_running) {
@@ -458,7 +459,7 @@ void displayBootWait(void) {
   digitalWrite(LED_MR_N_PIN, 1);
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(boot_led_array);
-  DEBUG_SERIAL.println();
+  LOG_INFO;
   digitalWrite(LED_LATCH_PIN, 1);  
   if (dimLEDs){
   analogWrite(LED_OE_N_PIN , 150);
@@ -481,7 +482,7 @@ void displayUpdateWait(void) {
   digitalWrite(LED_MR_N_PIN, 1);
   digitalWrite(LED_LATCH_PIN, 0);
   shiftOut(update_led_array);
-  DEBUG_SERIAL.println();
+  LOG_INFO;
   digitalWrite(LED_LATCH_PIN, 1);  
   if (dimLEDs){
   analogWrite(LED_OE_N_PIN , 150);
